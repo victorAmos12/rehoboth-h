@@ -1,0 +1,548 @@
+<div class="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 md:p-6">
+  <div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="mb-6 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <button
+          (click)="goBack()"
+          class="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition"
+        >
+          <i class="fas fa-arrow-left text-slate-600 dark:text-slate-400"></i>
+        </button>
+        <div>
+          <h1 class="text-3xl font-bold text-slate-900 dark:text-slate-100">
+            Dossier Médical
+          </h1>
+          @if (patient()) {
+            <p class="text-slate-600 dark:text-slate-400 mt-1">
+              {{ patient()!.prenom }} {{ patient()!.nom }}
+            </p>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Alert -->
+    @if (error()) {
+      <div class="mb-6 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 flex items-start gap-3">
+        <i class="fas fa-exclamation-circle text-red-500 dark:text-red-400 mt-0.5"></i>
+        <div>
+          <p class="text-sm font-medium text-red-700 dark:text-red-300">Erreur</p>
+          <p class="text-sm text-red-600 dark:text-red-400 mt-1">{{ error() }}</p>
+        </div>
+      </div>
+    }
+
+    <!-- Loading State -->
+    @if (loading()) {
+      <div class="flex items-center justify-center py-12">
+        <div class="text-center">
+          <i class="fas fa-spinner animate-spin text-4xl text-violet-600 dark:text-violet-400 mb-4"></i>
+          <p class="text-slate-600 dark:text-slate-400">Chargement du dossier médical...</p>
+        </div>
+      </div>
+    } @else if (medicalFile()) {
+      <!-- Tabs -->
+      <div class="mb-6 border-b border-slate-200 dark:border-slate-700">
+        <div class="flex gap-4">
+          <button
+            (click)="activeTab.set('overview')"
+            [class.border-b-2]="activeTab() === 'overview'"
+            [class.border-violet-600]="activeTab() === 'overview'"
+            [class.text-violet-600]="activeTab() === 'overview'"
+            [class.text-slate-600]="activeTab() !== 'overview'"
+            class="dark:text-slate-400 dark:hover:text-slate-300 pb-4 font-medium transition"
+          >
+            <i class="fas fa-file-medical mr-2"></i>Aperçu
+          </button>
+          <button
+            (click)="activeTab.set('family')"
+            [class.border-b-2]="activeTab() === 'family'"
+            [class.border-violet-600]="activeTab() === 'family'"
+            [class.text-violet-600]="activeTab() === 'family'"
+            [class.text-slate-600]="activeTab() !== 'family'"
+            class="dark:text-slate-400 dark:hover:text-slate-300 pb-4 font-medium transition"
+          >
+            <i class="fas fa-users mr-2"></i>Antécédents Familiaux
+          </button>
+          <button
+            (click)="activeTab.set('vaccinations')"
+            [class.border-b-2]="activeTab() === 'vaccinations'"
+            [class.border-violet-600]="activeTab() === 'vaccinations'"
+            [class.text-violet-600]="activeTab() === 'vaccinations'"
+            [class.text-slate-600]="activeTab() !== 'vaccinations'"
+            class="dark:text-slate-400 dark:hover:text-slate-300 pb-4 font-medium transition"
+          >
+            <i class="fas fa-syringe mr-2"></i>Vaccinations
+          </button>
+          <button
+            (click)="activeTab.set('critical')"
+            [class.border-b-2]="activeTab() === 'critical'"
+            [class.border-violet-600]="activeTab() === 'critical'"
+            [class.text-violet-600]="activeTab() === 'critical'"
+            [class.text-slate-600]="activeTab() !== 'critical'"
+            class="dark:text-slate-400 dark:hover:text-slate-300 pb-4 font-medium transition"
+          >
+            <i class="fas fa-exclamation-triangle mr-2"></i>Infos Critiques
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Content -->
+      <div class="space-y-6">
+        <!-- Overview Tab -->
+        @if (activeTab() === 'overview') {
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Patient Info Card -->
+            <div class="card p-6 shadow-lg">
+              <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">
+                <i class="fas fa-user mr-2 text-violet-600 dark:text-violet-400"></i>Informations Patient
+              </h2>
+              @if (patient()) {
+                <div class="space-y-3">
+                  <div>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Nom</p>
+                    <p class="text-slate-900 dark:text-slate-100 font-medium">{{ patient()!.nom }}</p>
+                  </div>
+                  <div>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Prénom</p>
+                    <p class="text-slate-900 dark:text-slate-100 font-medium">{{ patient()!.prenom }}</p>
+                  </div>
+                  <div>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Email</p>
+                    <p class="text-slate-900 dark:text-slate-100 font-medium">{{ patient()!.email }}</p>
+                  </div>
+                  <div>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Téléphone</p>
+                    <p class="text-slate-900 dark:text-slate-100 font-medium">{{ patient()!.telephone }}</p>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- Medical File Info Card -->
+            <div class="card p-6 shadow-lg">
+              <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">
+                <i class="fas fa-folder-medical mr-2 text-violet-600 dark:text-violet-400"></i>Dossier Médical
+              </h2>
+              @if (medicalFile()) {
+                <div class="space-y-3">
+                  <div>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Numéro de Dossier</p>
+                    <p class="text-slate-900 dark:text-slate-100 font-medium">{{ medicalFile()!.numeroDossier || 'N/A' }}</p>
+                  </div>
+                  <div>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Statut</p>
+                    <p class="text-slate-900 dark:text-slate-100 font-medium">
+                      <span class="inline-block px-3 py-1 rounded-full text-sm font-semibold"
+                        [class.bg-green-100]="medicalFile()!.actif"
+                        [class.dark:bg-green-900/30]="medicalFile()!.actif"
+                        [class.text-green-700]="medicalFile()!.actif"
+                        [class.dark:text-green-400]="medicalFile()!.actif"
+                        [class.bg-red-100]="!medicalFile()!.actif"
+                        [class.dark:bg-red-900/30]="!medicalFile()!.actif"
+                        [class.text-red-700]="!medicalFile()!.actif"
+                        [class.dark:text-red-400]="!medicalFile()!.actif"
+                      >
+                        {{ medicalFile()!.actif ? 'Actif' : 'Inactif' }}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Date de Création</p>
+                    <p class="text-slate-900 dark:text-slate-100 font-medium">
+                      {{ medicalFile()!.dateCreation ? (medicalFile()!.dateCreation | date: 'dd/MM/yyyy') : 'N/A' }}
+                    </p>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Family History Tab -->
+        @if (activeTab() === 'family') {
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">
+                <i class="fas fa-users mr-2 text-violet-600 dark:text-violet-400"></i>Antécédents Familiaux
+              </h2>
+              <button
+                (click)="showAddFamilyHistory.set(!showAddFamilyHistory())"
+                class="px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-700 dark:bg-violet-600 dark:hover:bg-violet-700 text-white font-medium transition"
+              >
+                <i class="fas fa-plus mr-2"></i>Ajouter
+              </button>
+            </div>
+
+            <!-- Add Form -->
+            @if (showAddFamilyHistory()) {
+              <div class="card p-6 shadow-lg">
+                <form [formGroup]="familyHistoryForm" (ngSubmit)="addFamilyHistory()" class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                      Relation
+                    </label>
+                    <input
+                      type="text"
+                      formControlName="relation"
+                      placeholder="ex: Mère, Père, Frère..."
+                      class="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                      Maladie
+                    </label>
+                    <input
+                      type="text"
+                      formControlName="maladie"
+                      placeholder="ex: Diabète, Hypertension..."
+                      class="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                      Description
+                    </label>
+                    <textarea
+                      formControlName="description"
+                      placeholder="Détails supplémentaires..."
+                      rows="3"
+                      class="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                    ></textarea>
+                  </div>
+                  <div class="flex gap-2">
+                    <button
+                      type="submit"
+                      class="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-medium transition"
+                    >
+                      <i class="fas fa-check mr-2"></i>Ajouter
+                    </button>
+                    <button
+                      type="button"
+                      (click)="showAddFamilyHistory.set(false)"
+                      class="px-4 py-2 rounded-lg bg-slate-300 dark:bg-slate-600 hover:bg-slate-400 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 font-medium transition"
+                    >
+                      <i class="fas fa-times mr-2"></i>Annuler
+                    </button>
+                  </div>
+                </form>
+              </div>
+            }
+
+            <!-- List -->
+            @if (familyHistories().length > 0) {
+              <div class="space-y-3">
+                @for (history of familyHistories(); track history.id) {
+                  <div class="card p-4 shadow-lg">
+                    <div class="flex items-start justify-between">
+                      <div class="flex-1">
+                        <h3 class="font-bold text-slate-900 dark:text-slate-100">
+                          {{ history.relation }} - {{ history.maladie }}
+                        </h3>
+                        @if (history.description) {
+                          <p class="text-sm text-slate-600 dark:text-slate-400 mt-2">{{ history.description }}</p>
+                        }
+                      </div>
+                      <button
+                        (click)="deleteFamilyHistory(history.id!)"
+                        class="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 transition"
+                      >
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="text-center py-8 text-slate-600 dark:text-slate-400">
+                <i class="fas fa-inbox text-3xl mb-2"></i>
+                <p>Aucun antécédent familial enregistré</p>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Vaccinations Tab -->
+        @if (activeTab() === 'vaccinations') {
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">
+                <i class="fas fa-syringe mr-2 text-violet-600 dark:text-violet-400"></i>Vaccinations
+              </h2>
+              <button
+                (click)="showAddVaccination.set(!showAddVaccination())"
+                class="px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-700 dark:bg-violet-600 dark:hover:bg-violet-700 text-white font-medium transition"
+              >
+                <i class="fas fa-plus mr-2"></i>Ajouter
+              </button>
+            </div>
+
+            <!-- Add Form -->
+            @if (showAddVaccination()) {
+              <div class="card p-6 shadow-lg">
+                <form [formGroup]="vaccinationForm" (ngSubmit)="addVaccination()" class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                      Nom du Vaccin
+                    </label>
+                    <input
+                      type="text"
+                      formControlName="nom"
+                      placeholder="ex: COVID-19, Grippe..."
+                      class="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                    />
+                  </div>
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                        Date de Vaccination
+                      </label>
+                      <input
+                        type="date"
+                        formControlName="dateVaccination"
+                        class="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                        Prochain Rappel
+                      </label>
+                      <input
+                        type="date"
+                        formControlName="dateProchainRappel"
+                        class="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                      Médecin
+                    </label>
+                    <input
+                      type="text"
+                      formControlName="medecin"
+                      placeholder="Nom du médecin"
+                      class="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                      Notes
+                    </label>
+                    <textarea
+                      formControlName="notes"
+                      placeholder="Notes supplémentaires..."
+                      rows="3"
+                      class="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                    ></textarea>
+                  </div>
+                  <div class="flex gap-2">
+                    <button
+                      type="submit"
+                      class="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-medium transition"
+                    >
+                      <i class="fas fa-check mr-2"></i>Ajouter
+                    </button>
+                    <button
+                      type="button"
+                      (click)="showAddVaccination.set(false)"
+                      class="px-4 py-2 rounded-lg bg-slate-300 dark:bg-slate-600 hover:bg-slate-400 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 font-medium transition"
+                    >
+                      <i class="fas fa-times mr-2"></i>Annuler
+                    </button>
+                  </div>
+                </form>
+              </div>
+            }
+
+            <!-- List -->
+            @if (vaccinations().length > 0) {
+              <div class="space-y-3">
+                @for (vaccination of vaccinations(); track vaccination.id) {
+                  <div class="card p-4 shadow-lg">
+                    <div class="flex items-start justify-between">
+                      <div class="flex-1">
+                        <h3 class="font-bold text-slate-900 dark:text-slate-100">
+                          {{ vaccination.nom }}
+                        </h3>
+                        <div class="grid grid-cols-2 gap-4 mt-2 text-sm">
+                          <div>
+                            <p class="text-slate-600 dark:text-slate-400">Date</p>
+                            <p class="text-slate-900 dark:text-slate-100 font-medium">
+                              {{ vaccination.dateVaccination ? (vaccination.dateVaccination | date: 'dd/MM/yyyy') : 'N/A' }}
+                            </p>
+                          </div>
+                          @if (vaccination.dateProchainRappel) {
+                            <div>
+                              <p class="text-slate-600 dark:text-slate-400">Prochain Rappel</p>
+                              <p class="text-slate-900 dark:text-slate-100 font-medium">
+                                {{ vaccination.dateProchainRappel | date: 'dd/MM/yyyy' }}
+                              </p>
+                            </div>
+                          }
+                        </div>
+                        @if (vaccination.medecin) {
+                          <p class="text-sm text-slate-600 dark:text-slate-400 mt-2">
+                            <i class="fas fa-user-md mr-1"></i>{{ vaccination.medecin }}
+                          </p>
+                        }
+                        @if (vaccination.notes) {
+                          <p class="text-sm text-slate-600 dark:text-slate-400 mt-2">{{ vaccination.notes }}</p>
+                        }
+                      </div>
+                      <button
+                        (click)="deleteVaccination(vaccination.id!)"
+                        class="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 transition"
+                      >
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="text-center py-8 text-slate-600 dark:text-slate-400">
+                <i class="fas fa-inbox text-3xl mb-2"></i>
+                <p>Aucune vaccination enregistrée</p>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Critical Info Tab -->
+        @if (activeTab() === 'critical') {
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">
+                <i class="fas fa-exclamation-triangle mr-2 text-violet-600 dark:text-violet-400"></i>Informations Critiques
+              </h2>
+              <button
+                (click)="showAddCriticalInfo.set(!showAddCriticalInfo())"
+                class="px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-700 dark:bg-violet-600 dark:hover:bg-violet-700 text-white font-medium transition"
+              >
+                <i class="fas fa-plus mr-2"></i>Ajouter
+              </button>
+            </div>
+
+            <!-- Add Form -->
+            @if (showAddCriticalInfo()) {
+              <div class="card p-6 shadow-lg">
+                <form [formGroup]="criticalInfoForm" (ngSubmit)="addCriticalInfo()" class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                      Type
+                    </label>
+                    <input
+                      type="text"
+                      formControlName="type"
+                      placeholder="ex: Allergie, Contre-indication..."
+                      class="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                      Description
+                    </label>
+                    <textarea
+                      formControlName="description"
+                      placeholder="Détails importants..."
+                      rows="3"
+                      class="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                    ></textarea>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                      Sévérité
+                    </label>
+                    <select
+                      formControlName="severite"
+                      class="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                    >
+                      <option value="faible">Faible</option>
+                      <option value="moyen">Moyen</option>
+                      <option value="élevé">Élevé</option>
+                      <option value="critique">Critique</option>
+                    </select>
+                  </div>
+                  <div class="flex gap-2">
+                    <button
+                      type="submit"
+                      class="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-medium transition"
+                    >
+                      <i class="fas fa-check mr-2"></i>Ajouter
+                    </button>
+                    <button
+                      type="button"
+                      (click)="showAddCriticalInfo.set(false)"
+                      class="px-4 py-2 rounded-lg bg-slate-300 dark:bg-slate-600 hover:bg-slate-400 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 font-medium transition"
+                    >
+                      <i class="fas fa-times mr-2"></i>Annuler
+                    </button>
+                  </div>
+                </form>
+              </div>
+            }
+
+            <!-- List -->
+            @if (criticalInfos().length > 0) {
+              <div class="space-y-3">
+                @for (info of criticalInfos(); track info.id) {
+                  <div class="card p-4 shadow-lg border-l-4"
+                    [class.border-red-600]="info.severite === 'critique'"
+                    [class.border-orange-600]="info.severite === 'élevé'"
+                    [class.border-yellow-600]="info.severite === 'moyen'"
+                    [class.border-green-600]="info.severite === 'faible'"
+                  >
+                    <div class="flex items-start justify-between">
+                      <div class="flex-1">
+                        <div class="flex items-center gap-2">
+                          <h3 class="font-bold text-slate-900 dark:text-slate-100">
+                            {{ info.type }}
+                          </h3>
+                          <span class="inline-block px-2 py-1 rounded text-xs font-semibold"
+                            [class.bg-red-100]="info.severite === 'critique'"
+                            [class.dark:bg-red-900/30]="info.severite === 'critique'"
+                            [class.text-red-700]="info.severite === 'critique'"
+                            [class.dark:text-red-400]="info.severite === 'critique'"
+                            [class.bg-orange-100]="info.severite === 'élevé'"
+                            [class.dark:bg-orange-900/30]="info.severite === 'élevé'"
+                            [class.text-orange-700]="info.severite === 'élevé'"
+                            [class.dark:text-orange-400]="info.severite === 'élevé'"
+                            [class.bg-yellow-100]="info.severite === 'moyen'"
+                            [class.dark:bg-yellow-900/30]="info.severite === 'moyen'"
+                            [class.text-yellow-700]="info.severite === 'moyen'"
+                            [class.dark:text-yellow-400]="info.severite === 'moyen'"
+                            [class.bg-green-100]="info.severite === 'faible'"
+                            [class.dark:bg-green-900/30]="info.severite === 'faible'"
+                            [class.text-green-700]="info.severite === 'faible'"
+                            [class.dark:text-green-400]="info.severite === 'faible'"
+                          >
+                            {{ info.severite }}
+                          </span>
+                        </div>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 mt-2">{{ info.description }}</p>
+                      </div>
+                      <button
+                        (click)="deleteCriticalInfo(info.id!)"
+                        class="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 transition"
+                      >
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="text-center py-8 text-slate-600 dark:text-slate-400">
+                <i class="fas fa-inbox text-3xl mb-2"></i>
+                <p>Aucune information critique enregistrée</p>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

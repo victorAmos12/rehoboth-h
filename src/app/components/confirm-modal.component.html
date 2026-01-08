@@ -1,0 +1,58 @@
+@if (modalService.modalState().isOpen && modalService.modalState().options) {
+  <div 
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-fadeIn"
+    (click)="onBackdropClick()"
+  >
+    <div 
+      class="bg-white dark:bg-gray-900 rounded-lg shadow-2xl max-w-md w-11/12 max-h-80vh overflow-y-auto border border-gray-200 dark:border-gray-700 animate-slideUp"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Header -->
+      <div class="flex items-center gap-3 px-6 py-6 border-b border-gray-200 dark:border-gray-700 relative">
+        @if (modalService.modalState().options!.icon) {
+          <i [class]="'fas ' + modalService.modalState().options!.icon + ' text-lg text-blue-600 dark:text-blue-400 flex-shrink-0'"></i>
+        }
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex-1">
+          {{ modalService.modalState().options!.title }}
+        </h2>
+        <button 
+          class="absolute right-4 top-4 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
+          (click)="onCancel()" 
+          title="Fermer"
+        >
+          <i class="fas fa-times text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Content -->
+      <div class="px-6 py-6 text-gray-700 dark:text-gray-300 leading-relaxed">
+        @if (modalService.modalState().options!.isHtml) {
+          <div class="m-0 break-words" [innerHTML]="modalService.modalState().options!.message"></div>
+        } @else {
+          <p class="m-0 break-words">{{ modalService.modalState().options!.message }}</p>
+        }
+      </div>
+
+      <!-- Footer -->
+      <div class="flex gap-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 justify-end bg-gray-50 dark:bg-gray-800">
+        <button
+          class="px-4 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors min-w-24"
+          (click)="onCancel()"
+        >
+          {{ modalService.modalState().options!.cancelText }}
+        </button>
+        <button
+          [ngClass]="{
+            'bg-blue-600 hover:bg-blue-700 text-white': !modalService.modalState().options!.confirmClass || modalService.modalState().options!.confirmClass === 'primary',
+            'bg-red-600 hover:bg-red-700 text-white': modalService.modalState().options!.confirmClass === 'danger',
+            'bg-orange-500 hover:bg-orange-600 text-white': modalService.modalState().options!.confirmClass === 'warning'
+          }"
+          class="px-4 py-2 rounded-md text-sm font-medium transition-colors min-w-24 focus:outline-none focus:ring-2 focus:ring-offset-2"
+          (click)="onConfirm()"
+        >
+          {{ modalService.modalState().options!.confirmText }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

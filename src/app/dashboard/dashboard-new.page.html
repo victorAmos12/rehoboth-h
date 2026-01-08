@@ -1,0 +1,144 @@
+<div class="p-6">
+  <!-- En-tête -->
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold text-[var(--color-text-primary)]">Tableau de Bord</h1>
+    <p class="text-[var(--color-text-secondary)] mt-2">Bienvenue sur votre espace de gestion hospitalière</p>
+  </div>
+
+  <!-- Statistiques -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Card 1: Patients Totaux -->
+    <div class="card p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-[var(--color-text-muted)] text-sm font-medium">Patients Totaux</p>
+          <h3 class="text-3xl font-bold text-[var(--color-text-primary)] mt-2">1,234</h3>
+        </div>
+        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-[var(--color-info)] text-xl">
+          <i class="fas fa-users"></i>
+        </div>
+      </div>
+      <div class="mt-4 flex items-center gap-2 text-sm">
+        <span class="text-[var(--color-success)]">+12%</span>
+        <span class="text-[var(--color-text-muted)]">ce mois</span>
+      </div>
+    </div>
+
+    <!-- Card 2: Lits Occupés -->
+    <div class="card p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-[var(--color-text-muted)] text-sm font-medium">Lits Occupés</p>
+          <h3 class="text-3xl font-bold text-[var(--color-text-primary)] mt-2">456</h3>
+        </div>
+        <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center text-[var(--color-error)] text-xl">
+          <i class="fas fa-bed"></i>
+        </div>
+      </div>
+      <div class="mt-4 flex items-center gap-2 text-sm">
+        <span class="text-[var(--color-warning)]">85%</span>
+        <span class="text-[var(--color-text-muted)]">d'occupation</span>
+      </div>
+    </div>
+
+    <!-- Card 3: Médecins Disponibles -->
+    <div class="card p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-[var(--color-text-muted)] text-sm font-medium">Médecins Disponibles</p>
+          <h3 class="text-3xl font-bold text-[var(--color-text-primary)] mt-2">28</h3>
+        </div>
+        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center text-[var(--color-success)] text-xl">
+          <i class="fas fa-stethoscope"></i>
+        </div>
+      </div>
+      <div class="mt-4 flex items-center gap-2 text-sm">
+        <span class="text-[var(--color-success)]">+3</span>
+        <span class="text-[var(--color-text-muted)]">depuis hier</span>
+      </div>
+    </div>
+
+    <!-- Card 4: Consultations -->
+    <div class="card p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-[var(--color-text-muted)] text-sm font-medium">Consultations</p>
+          <h3 class="text-3xl font-bold text-[var(--color-text-primary)] mt-2">89</h3>
+        </div>
+        <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center text-[var(--color-warning)] text-xl">
+          <i class="fas fa-calendar-check"></i>
+        </div>
+      </div>
+      <div class="mt-4 flex items-center gap-2 text-sm">
+        <span class="text-[var(--color-info)]">Aujourd'hui</span>
+        <span class="text-[var(--color-text-muted)]">en cours</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Graphiques -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Chart 1: Patients par Département -->
+    <div class="card p-6 lg:col-span-2">
+      <h3 class="text-lg font-semibold text-[var(--color-text-primary)] mb-2">Patients par Département</h3>
+      <p class="text-[var(--color-text-muted)] text-sm mb-6">Distribution des patients cette semaine</p>
+      <div class="h-64 bg-[var(--color-bg-hover)] rounded-lg flex items-center justify-center">
+        <div class="text-center text-[var(--color-text-muted)]">
+          <i class="fas fa-chart-bar text-3xl mb-2"></i>
+          <p>Graphique - Chart.js/ApexCharts</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart 2: Taux d'Occupation -->
+    <div class="card p-6">
+      <h3 class="text-lg font-semibold text-[var(--color-text-primary)] mb-2">Taux d'Occupation</h3>
+      <p class="text-[var(--color-text-muted)] text-sm mb-6">Par étage</p>
+      <div class="space-y-4">
+        <!-- Floor 1 -->
+        <div>
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-sm font-medium text-[var(--color-text-secondary)]">Étage 1</span>
+            <span class="text-sm font-semibold text-[var(--color-text-primary)]">85%</span>
+          </div>
+          <div class="w-full h-2 bg-[var(--color-bg-hover)] rounded-full overflow-hidden">
+            <div class="h-full bg-[var(--color-info)]" style="width: 85%"></div>
+          </div>
+        </div>
+
+        <!-- Floor 2 -->
+        <div>
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-sm font-medium text-[var(--color-text-secondary)]">Étage 2</span>
+            <span class="text-sm font-semibold text-[var(--color-text-primary)]">72%</span>
+          </div>
+          <div class="w-full h-2 bg-[var(--color-bg-hover)] rounded-full overflow-hidden">
+            <div class="h-full bg-[var(--color-info)]" style="width: 72%"></div>
+          </div>
+        </div>
+
+        <!-- Floor 3 -->
+        <div>
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-sm font-medium text-[var(--color-text-secondary)]">Étage 3</span>
+            <span class="text-sm font-semibold text-[var(--color-text-primary)]">91%</span>
+          </div>
+          <div class="w-full h-2 bg-[var(--color-bg-hover)] rounded-full overflow-hidden">
+            <div class="h-full bg-[var(--color-info)]" style="width: 91%"></div>
+          </div>
+        </div>
+
+        <!-- ICU -->
+        <div>
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-sm font-medium text-[var(--color-text-secondary)]">Soins Intensifs</span>
+            <span class="text-sm font-semibold text-[var(--color-error)]">100%</span>
+          </div>
+          <div class="w-full h-2 bg-[var(--color-bg-hover)] rounded-full overflow-hidden">
+            <div class="h-full bg-[var(--color-error)]" style="width: 100%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

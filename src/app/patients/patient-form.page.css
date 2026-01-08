@@ -1,0 +1,4 @@
+/* Patient Form Styles */
+:host {
+  display: block;
+}

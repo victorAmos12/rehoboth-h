@@ -1,0 +1,285 @@
+<div class="p-6">
+  <div class="flex items-center justify-between gap-4 mb-6">
+    <div class="flex items-center gap-3">
+      <button
+        (click)="goBack()"
+        class="px-3 py-2 rounded-lg border border-[var(--color-border-default)] hover:bg-[var(--color-bg-hover)]"
+      >
+        Retour
+      </button>
+      <div>
+        <h1 class="text-2xl font-semibold text-[var(--color-text-primary)]">Détail utilisateur</h1>
+        <p class="text-sm text-[var(--color-text-muted)]">Ressources humaines / Utilisateurs</p>
+      </div>
+    </div>
+
+    @if (user()) {
+      <button
+        (click)="editUser()"
+        class="px-4 py-2 rounded-lg bg-[var(--color-primary)] text-white hover:opacity-90 transition disabled:opacity-50"
+        [disabled]="actionLoading()"
+      >
+        Modifier
+      </button>
+    }
+  </div>
+
+  @if (error()) {
+    <div class="mb-4 p-3 rounded-lg bg-red-50 text-red-700 border border-red-200">{{ error() }}</div>
+  }
+
+  @if (loading()) {
+    <div class="flex items-center justify-center py-12">
+      <div class="flex flex-col items-center gap-3">
+        <div class="w-8 h-8 border-4 border-[var(--color-border-default)] border-t-[var(--color-primary)] rounded-full animate-spin"></div>
+        <p class="text-[var(--color-text-muted)]">Chargement des données…</p>
+      </div>
+    </div>
+  } @else if (user()) {
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <!-- Identité Section -->
+      <div class="lg:col-span-2 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] p-5">
+        <div class="flex items-start justify-between">
+          <div>
+            <div class="text-lg font-semibold text-[var(--color-text-primary)]">{{ user()!.identite.prenom }} {{ user()!.identite.nom }}</div>
+            <div class="text-sm text-[var(--color-text-muted)]">{{ user()!.identite.email }} • {{ user()!.identite.login }}</div>
+          </div>
+          <span
+            class="inline-flex items-center px-2 py-1 rounded-full text-xs"
+            [class.bg-green-100]="user()!.securite.actif"
+            [class.text-green-700]="user()!.securite.actif"
+            [class.bg-gray-100]="!user()!.securite.actif"
+            [class.text-gray-700]="!user()!.securite.actif"
+          >
+            {{ user()!.securite.actif ? 'Actif' : 'Inactif' }}
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+          <div>
+            <div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Téléphone</div>
+            <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ user()!.informations_personnelles.telephone || '-' }}</div>
+          </div>
+          <div>
+            <div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Date création</div>
+            <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ user()!.historique.date_creation || '-' }}</div>
+          </div>
+          <div>
+            <div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Hôpital</div>
+            <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ user()!.informations_administratives.hopital?.nom || '-' }}</div>
+          </div>
+          <div>
+            <div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Rôle</div>
+            <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ user()!.informations_administratives.role?.nom || user()!.informations_administratives.role?.code || '-' }}</div>
+          </div>
+          <div>
+            <div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Profil</div>
+            <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ user()!.informations_administratives.profil?.nom || user()!.informations_administratives.profil?.code || '-' }}</div>
+          </div>
+          <div>
+            <div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Spécialité</div>
+            <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ user()!.informations_professionnelles.specialite?.nom || user()!.informations_professionnelles.specialite?.libelle || '-' }}</div>
+          </div>
+        </div>
+
+        <!-- Informations Personnelles -->
+        <div class="mt-8 pt-6 border-t border-[var(--color-border-default)]">
+          <h3 class="text-sm font-semibold text-[var(--color-text-primary)] mb-4">Informations personnelles</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Adresse</div>
+              <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ user()!.informations_personnelles.adresse || '-' }}</div>
+            </div>
+            <div>
+              <div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Ville</div>
+              <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ user()!.informations_personnelles.ville || '-' }}</div>
+            </div>
+            <div>
+              <div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Code postal</div>
+              <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ user()!.informations_personnelles.code_postal || '-' }}</div>
+            </div>
+            <div>
+              <div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Date de naissance</div>
+              <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ user()!.informations_personnelles.date_naissance || '-' }}</div>
+            </div>
+            <div>
+              <div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Sexe</div>
+              <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ user()!.informations_personnelles.sexe || '-' }}</div>
+            </div>
+            <div>
+              <div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Nationalité</div>
+              <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ user()!.informations_personnelles.nationalite || '-' }}</div>
+            </div>
+            <div>
+              <div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Numéro d'identité</div>
+              <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ user()!.informations_personnelles.numero_identite || '-' }}</div>
+            </div>
+            <div>
+              <div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Type d'identité</div>
+              <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ user()!.informations_personnelles.type_identite || '-' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Informations Professionnelles -->
+        <div class="mt-8 pt-6 border-t border-[var(--color-border-default)]">
+          <h3 class="text-sm font-semibold text-[var(--color-text-primary)] mb-4">Informations professionnelles</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Numéro de licence</div>
+              <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ user()!.informations_professionnelles.numero_licence || '-' }}</div>
+            </div>
+            <div>
+              <div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Numéro d'ordre</div>
+              <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ user()!.informations_professionnelles.numero_ordre || '-' }}</div>
+            </div>
+            <div>
+              <div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Date d'embauche</div>
+              <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ user()!.informations_professionnelles.date_embauche || '-' }}</div>
+            </div>
+            <div>
+              <div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Bio</div>
+              <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ user()!.informations_professionnelles.bio || '-' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] p-5">
+        <div class="text-sm font-semibold text-[var(--color-text-primary)]">Actions de sécurité</div>
+        <div class="text-xs text-[var(--color-text-muted)] mt-1">
+          Gérez les paramètres de sécurité du compte
+        </div>
+
+        <div class="mt-4 space-y-2">
+          <!-- Lock/Unlock Button -->
+          <button
+            (click)="toggleLock()"
+            [disabled]="actionLoading() || actionInProgress() !== null"
+            class="w-full px-3 py-2 rounded-lg border transition text-sm text-left font-medium flex items-center gap-2"
+            [class.border-red-300]="user()!.securite.compte_verrouille"
+            [class.bg-red-50]="user()!.securite.compte_verrouille"
+            [class.text-red-700]="user()!.securite.compte_verrouille"
+            [class.hover:bg-red-100]="user()!.securite.compte_verrouille && !actionLoading()"
+            [class.border-orange-300]="!user()!.securite.compte_verrouille"
+            [class.bg-orange-50]="!user()!.securite.compte_verrouille"
+            [class.text-orange-700]="!user()!.securite.compte_verrouille"
+            [class.hover:bg-orange-100]="!user()!.securite.compte_verrouille && !actionLoading()"
+            [class.opacity-50]="actionLoading()"
+          >
+            @if (actionInProgress() === 'lock') {
+              <span class="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+            } @else {
+              <i [class]="user()!.securite.compte_verrouille ? 'fas fa-lock-open' : 'fas fa-lock'"></i>
+            }
+            {{ user()!.securite.compte_verrouille ? 'Déverrouiller le compte' : 'Verrouiller le compte' }}
+          </button>
+
+          <!-- 2FA Toggle Button -->
+          <button
+            (click)="toggle2FA()"
+            [disabled]="actionLoading() || actionInProgress() !== null"
+            class="w-full px-3 py-2 rounded-lg border transition text-sm text-left font-medium flex items-center gap-2"
+            [class.border-green-300]="user()!.securite.authentification_2fa"
+            [class.bg-green-50]="user()!.securite.authentification_2fa"
+            [class.text-green-700]="user()!.securite.authentification_2fa"
+            [class.hover:bg-green-100]="user()!.securite.authentification_2fa && !actionLoading()"
+            [class.border-gray-300]="!user()!.securite.authentification_2fa"
+            [class.bg-gray-50]="!user()!.securite.authentification_2fa"
+            [class.text-gray-700]="!user()!.securite.authentification_2fa"
+            [class.hover:bg-gray-100]="!user()!.securite.authentification_2fa && !actionLoading()"
+            [class.opacity-50]="actionLoading()"
+          >
+            @if (actionInProgress() === '2fa') {
+              <span class="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+            } @else {
+              <i [class]="user()!.securite.authentification_2fa ? 'fas fa-shield-alt' : 'fas fa-shield'"></i>
+            }
+            {{ user()!.securite.authentification_2fa ? '2FA Activée' : '2FA Désactivée' }}
+          </button>
+
+          <!-- Reset Password Button -->
+          <button
+            (click)="resetPassword()"
+            [disabled]="actionLoading() || actionInProgress() !== null"
+            class="w-full px-3 py-2 rounded-lg border border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 transition text-sm text-left font-medium disabled:opacity-50 flex items-center gap-2"
+          >
+            @if (actionInProgress() === 'password') {
+              <span class="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+            } @else {
+              <i class="fas fa-key"></i>
+            }
+            Réinitialiser le mot de passe
+          </button>
+
+          <!-- Export PDF Button -->
+          <button
+            (click)="exportPDF()"
+            [disabled]="exporting() || actionLoading()"
+            class="w-full px-3 py-2 rounded-lg border border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100 transition text-sm text-left font-medium disabled:opacity-50 flex items-center gap-2"
+          >
+            @if (exporting()) {
+              <span class="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+            } @else {
+              <i class="fas fa-file-pdf"></i>
+            }
+            Exporter en PDF
+          </button>
+        </div>
+
+        <!-- Security Info -->
+        <div class="mt-6 pt-4 border-t border-[var(--color-border-default)]">
+          <h4 class="text-xs font-semibold text-[var(--color-text-primary)] uppercase mb-3">Informations de sécurité</h4>
+          <div class="space-y-2 text-xs">
+            <div class="flex items-center justify-between">
+              <span class="text-[var(--color-text-muted)]">Compte actif</span>
+              <span
+                class="px-2 py-1 rounded text-xs font-medium"
+                [class.bg-green-100]="user()!.securite.actif"
+                [class.text-green-700]="user()!.securite.actif"
+                [class.bg-red-100]="!user()!.securite.actif"
+                [class.text-red-700]="!user()!.securite.actif"
+              >
+                {{ user()!.securite.actif ? 'Oui' : 'Non' }}
+              </span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-[var(--color-text-muted)]">Compte verrouillé</span>
+              <span
+                class="px-2 py-1 rounded text-xs font-medium"
+                [class.bg-red-100]="user()!.securite.compte_verrouille"
+                [class.text-red-700]="user()!.securite.compte_verrouille"
+                [class.bg-green-100]="!user()!.securite.compte_verrouille"
+                [class.text-green-700]="!user()!.securite.compte_verrouille"
+              >
+                {{ user()!.securite.compte_verrouille ? 'Oui' : 'Non' }}
+              </span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-[var(--color-text-muted)]">2FA activée</span>
+              <span
+                class="px-2 py-1 rounded text-xs font-medium"
+                [class.bg-green-100]="user()!.securite.authentification_2fa"
+                [class.text-green-700]="user()!.securite.authentification_2fa"
+                [class.bg-gray-100]="!user()!.securite.authentification_2fa"
+                [class.text-gray-700]="!user()!.securite.authentification_2fa"
+              >
+                {{ user()!.securite.authentification_2fa ? 'Oui' : 'Non' }}
+              </span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-[var(--color-text-muted)]">Tentatives échouées</span>
+              <span class="font-medium">{{ user()!.securite.nombre_tentatives_connexion }}</span>
+            </div>
+            @if (user()!.securite.derniere_connexion) {
+              <div class="flex items-center justify-between">
+                <span class="text-[var(--color-text-muted)]">Dernière connexion</span>
+                <span class="font-medium">{{ user()!.securite.derniere_connexion | date: 'short' }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,66 @@
+<div class="p-6">
+  <div class="flex items-center justify-between gap-4 mb-6">
+    <div class="flex items-center gap-3">
+      <button
+        (click)="goBack()"
+        class="px-3 py-2 rounded-lg border border-[var(--color-border-default)] hover:bg-[var(--color-bg-hover)]"
+      >
+        Retour
+      </button>
+      <div>
+        <h1 class="text-2xl font-semibold text-[var(--color-text-primary)]">Détail rôle</h1>
+        <p class="text-sm text-[var(--color-text-muted)]">Paramètres / Rôles</p>
+      </div>
+    </div>
+
+    @if (role()) {
+      <a
+        class="px-4 py-2 rounded-lg bg-[var(--color-primary)] text-white hover:opacity-90 transition"
+        [routerLink]="['/parametres/roles', role()!.id, 'edit']"
+      >
+        Modifier
+      </a>
+    }
+  </div>
+
+  @if (error()) {
+    <div class="mb-4 p-3 rounded-lg bg-red-50 text-red-700 border border-red-200">{{ error() }}</div>
+  }
+
+  @if (loading()) {
+    <div class="text-[var(--color-text-muted)]">Chargement…</div>
+  } @else if (role()) {
+    <div class="rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] p-5">
+      <div class="flex items-start justify-between">
+        <div>
+          <div class="text-lg font-semibold text-[var(--color-text-primary)]">{{ role()!.nom }}</div>
+          <div class="text-sm text-[var(--color-text-muted)] font-mono">{{ role()!.code }}</div>
+        </div>
+        <span
+          class="inline-flex items-center px-2 py-1 rounded-full text-xs"
+          [class.bg-green-100]="role()!.actif"
+          [class.text-green-700]="role()!.actif"
+          [class.bg-gray-100]="!role()!.actif"
+          [class.text-gray-700]="!role()!.actif"
+        >
+          {{ role()!.actif ? 'Actif' : 'Inactif' }}
+        </span>
+      </div>
+
+      @if (role()!.description) {
+        <div class="mt-4 text-sm text-[var(--color-text-secondary)]">{{ role()!.description }}</div>
+      }
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+        <div>
+          <div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Niveau d'accès</div>
+          <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ role()!.niveau_acces ?? '-' }}</div>
+        </div>
+        <div>
+          <div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Date création</div>
+          <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ role()!.date_creation ?? '-' }}</div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,220 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center px-4 py-10">
+  <div class="w-full max-w-md">
+    <!-- Logo Section -->
+    <div class="mb-8 text-center">
+      <div class="inline-flex items-center justify-center mb-4">
+        <img src="/assets/image_rehoboth.png" alt="Rehoboth Logo" class="h-24 w-24 object-contain drop-shadow-lg">
+      </div>
+      <!-- <h1 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">Rehoboth</h1> -->
+      <p class="text-slate-600 dark:text-slate-400 text-sm">Système de Gestion Hospitalière</p>
+    </div>
+
+    <!-- Login Card -->
+    <div class="card p-8 shadow-lg">
+      <!-- Header -->
+      <div class="mb-8">
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">Authenfication</h2>
+        <p class="text-slate-600 dark:text-slate-400 text-sm">Accédez à votre espace personnel en toute sécurité</p>
+      </div>
+
+      <!-- Error Alert -->
+      @if (apiError()) {
+        <div class="mb-6 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 flex items-start gap-3">
+          <i class="fas fa-exclamation-circle text-red-500 dark:text-red-400 mt-0.5"></i>
+          <div>
+            <p class="text-sm font-medium text-red-700 dark:text-red-300">Erreur de connexion</p>
+            <p class="text-sm text-red-600 dark:text-red-400 mt-1">{{ apiError() }}</p>
+          </div>
+        </div>
+      }
+
+      <!-- 2FA Form -->
+      @if (requires2FA()) {
+        <div class="space-y-5">
+          <div class="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 flex items-start gap-3">
+            <i class="fas fa-shield-alt text-blue-500 dark:text-blue-400 mt-0.5"></i>
+            <div>
+              <p class="text-sm font-medium text-blue-700 dark:text-blue-300">Authentification à deux facteurs</p>
+              <p class="text-sm text-blue-600 dark:text-blue-400 mt-1">Entrez le code à 6 chiffres de votre authenticateur</p>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2" for="2fa-code">
+              <i class="fas fa-key mr-2 text-violet-600 dark:text-violet-400"></i>Code d'authentification
+            </label>
+            <input
+              id="2fa-code"
+              type="text"
+              inputmode="numeric"
+              maxlength="6"
+              placeholder="000000"
+              [(ngModel)]="twoFACode"
+              class="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 transition-all text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-center text-2xl tracking-widest font-mono focus:border-violet-600 dark:focus:border-violet-400 focus:ring-2 focus:ring-violet-200 dark:focus:ring-violet-900/50"
+            />
+          </div>
+
+          <div class="flex gap-3">
+            <button
+              type="button"
+              (click)="verify2FA()"
+              [disabled]="verifying2FA()"
+              class="flex-1 py-3 rounded-lg bg-violet-600 dark:bg-violet-600 text-white font-semibold transition-all flex items-center justify-center gap-2 hover:bg-violet-700 dark:hover:bg-violet-700 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              @if (verifying2FA()) {
+                <i class="fas fa-spinner animate-spin"></i>
+                <span>Vérification…</span>
+              } @else {
+                <i class="fas fa-check"></i>
+                <span>Vérifier</span>
+              }
+            </button>
+            <button
+              type="button"
+              (click)="cancel2FA()"
+              [disabled]="verifying2FA()"
+              class="flex-1 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 font-semibold transition-all hover:border-slate-400 dark:hover:border-slate-500 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              Annuler
+            </button>
+          </div>
+        </div>
+      } @else {
+        <!-- Login Form -->
+        <form class="space-y-5" [formGroup]="form" (ngSubmit)="onSubmit()">
+          <!-- Login Field -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2" for="login">
+              <i class="fas fa-user mr-2 text-violet-600 dark:text-violet-400"></i>Identifiant
+            </label>
+            <div class="relative">
+              <input
+                id="login"
+                type="text"
+                autocomplete="username"
+                formControlName="login"
+                placeholder="ex: jdupont ou j.dupont"
+                class="w-full px-4 py-3 rounded-lg border-2 transition-all text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
+                [class.border-slate-300]="!fieldError('login')"
+                [class.dark:border-slate-600]="!fieldError('login')"
+                [class.border-red-500]="fieldError('login')"
+                [class.dark:border-red-500]="fieldError('login')"
+                [class.focus:border-violet-600]="!fieldError('login')"
+                [class.dark:focus:border-violet-400]="!fieldError('login')"
+                [class.focus:ring-2]="!fieldError('login')"
+                [class.focus:ring-violet-200]="!fieldError('login')"
+                [class.dark:focus:ring-violet-900/50]="!fieldError('login')"
+              />
+              <i class="fas fa-user-circle absolute right-3 top-3.5 text-slate-400 dark:text-slate-500 text-lg"></i>
+            </div>
+            @if (fieldError('login')) {
+              <p class="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                <i class="fas fa-circle-exclamation text-xs"></i>
+                {{ fieldError('login') }}
+              </p>
+            }
+          </div>
+
+          <!-- Password Field -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2" for="password">
+              <i class="fas fa-lock mr-2 text-violet-600 dark:text-violet-400"></i>Mot de passe
+            </label>
+            <div class="relative">
+              <input
+                id="password"
+                [type]="showPassword() ? 'text' : 'password'"
+                autocomplete="current-password"
+                formControlName="password"
+                placeholder="Votre mot de passe"
+                class="w-full px-4 py-3 rounded-lg border-2 transition-all text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
+                [class.border-slate-300]="!fieldError('password')"
+                [class.dark:border-slate-600]="!fieldError('password')"
+                [class.border-red-500]="fieldError('password')"
+                [class.dark:border-red-500]="fieldError('password')"
+                [class.focus:border-violet-600]="!fieldError('password')"
+                [class.dark:focus:border-violet-400]="!fieldError('password')"
+                [class.focus:ring-2]="!fieldError('password')"
+                [class.focus:ring-violet-200]="!fieldError('password')"
+                [class.dark:focus:ring-violet-900/50]="!fieldError('password')"
+              />
+              <button
+                type="button"
+                (click)="togglePasswordVisibility()"
+                class="absolute right-3 top-3.5 text-slate-400 dark:text-slate-500 hover:text-violet-600 dark:hover:text-violet-400 transition text-lg"
+              >
+                <i [class]="showPassword() ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+              </button>
+            </div>
+            @if (fieldError('password')) {
+              <p class="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                <i class="fas fa-circle-exclamation text-xs"></i>
+                {{ fieldError('password') }}
+              </p>
+            }
+          </div>
+
+          <!-- Remember & Forgot Password -->
+          <div class="flex items-center justify-between gap-3">
+            <label class="flex items-center gap-2 cursor-pointer text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition">
+              <input
+                type="checkbox"
+                formControlName="remember"
+                class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 accent-violet-600 dark:accent-violet-400 cursor-pointer"
+              />
+              <span>Se souvenir de moi</span>
+            </label>
+            <a routerLink="/forgot-password" class="text-sm font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition">
+              Mot de passe oublié ?
+            </a>
+          </div>
+
+          <!-- Submit Button -->
+          <button
+            type="submit"
+            [disabled]="isSubmitting()"
+            class="w-full py-3 rounded-lg bg-violet-600 dark:bg-violet-600 text-white font-semibold transition-all flex items-center justify-center gap-2 hover:bg-violet-700 dark:hover:bg-violet-700 disabled:opacity-60 disabled:cursor-not-allowed mt-6"
+          >
+            @if (isSubmitting()) {
+              <i class="fas fa-spinner animate-spin"></i>
+              <span>Connexion en cours…</span>
+            } @else {
+              <i class="fas fa-sign-in-alt"></i>
+              <span>Se connecter</span>
+            }
+          </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="my-6 flex items-center gap-3">
+          <div class="flex-1 h-px bg-slate-300 dark:bg-slate-600"></div>
+          <span class="text-xs text-slate-500 dark:text-slate-400">ou</span>
+          <div class="flex-1 h-px bg-slate-300 dark:bg-slate-600"></div>
+        </div>
+
+        <!-- Google Sign-In -->
+        <button
+          type="button"
+          (click)="onGoogleSignIn()"
+          class="w-full py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 font-semibold transition-all flex items-center justify-center gap-2 hover:border-violet-600 dark:hover:border-violet-400 hover:bg-slate-50 dark:hover:bg-slate-600"
+        >
+          <i class="fab fa-google text-red-500"></i>
+          <span>Connexion avec Google</span>
+        </button>
+      }
+
+      <!-- Footer -->
+      <div class="mt-6 pt-6 border-t border-slate-300 dark:border-slate-600 text-center">
+        <p class="text-xs text-slate-500 dark:text-slate-400">
+          <i class="fas fa-shield-alt mr-1"></i>
+          Connexion sécurisée - Vos données sont protégées
+        </p>
+      </div>
+    </div>
+
+    <!-- Footer Info -->
+    <div class="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
+      <p>© 2024 Hôpital Rehoboth. Tous droits réservés.</p>
+    </div>
+  </div>
+</div>

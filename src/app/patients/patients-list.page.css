@@ -1,0 +1,4 @@
+/* Patients List Styles */
+:host {
+  display: block;
+}

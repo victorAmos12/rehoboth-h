@@ -1,0 +1,426 @@
+<div class="dashboard-container" [class.dark-mode]="darkMode()">
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.sidebar-closed]="!sidebarOpen()">
+    <div class="sidebar-inner">
+      <!-- Logo -->
+      <div class="sidebar-header">
+        <div class="logo-container">
+          <div class="logo-icon">
+            <i class="fas fa-hospital"></i>
+          </div>
+          <div>
+            <h1 class="logo-title">Rehoboth</h1>
+            <p class="logo-subtitle">Gestion Hospitalière</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Menu -->
+      <nav class="sidebar-nav">
+        <!-- Debug: Afficher le nombre de menus -->
+        @if (menus().length === 0) {
+          <div class="menu-empty">
+            ⚠️ Aucun menu chargé
+          </div>
+        }
+        
+        <!-- Menus dynamiques -->
+        @for (menu of menus(); track menu.id) {
+          @if (!menu.children || menu.children.length === 0) {
+            <!-- Menu simple sans enfants -->
+            <a
+              [routerLink]="menu.path"
+              class="menu-item"
+            >
+              <span class="menu-icon material-icons">{{ menu.icon || 'help_outline' }}</span>
+              <span class="menu-label">{{ menu.label }}</span>
+            </a>
+          } @else {
+            <!-- Menu avec enfants (collapsible) -->
+            <div class="menu-group">
+              @if (menu.section) {
+                <p class="menu-section-title">
+                  {{ menu.section }}
+                </p>
+              }
+              <button
+                (click)="toggleMenu(menu.id)"
+                class="menu-item menu-parent"
+                [class.expanded]="isMenuExpanded(menu.id)"
+              >
+                <div class="menu-item-content">
+                  <span class="menu-icon material-icons">{{ menu.icon || 'help_outline' }}</span>
+                  <span class="menu-label">{{ menu.label }}</span>
+                </div>
+                <i
+                  class="fas fa-chevron-down menu-chevron"
+                  [class.rotated]="isMenuExpanded(menu.id)"
+                ></i>
+              </button>
+
+              <!-- Sous-menus -->
+              @if (isMenuExpanded(menu.id)) {
+                <div class="submenu-container">
+                  @for (child of menu.children; track child.id) {
+                    <a
+                      [routerLink]="child.path"
+                      class="menu-item menu-child"
+                    >
+                      <span class="menu-icon material-icons">{{ child.icon || 'help_outline' }}</span>
+                      <span class="menu-label">{{ child.label }}</span>
+                    </a>
+                  }
+                </div>
+              }
+            </div>
+          }
+        }
+      </nav>
+
+      <!-- Dark Mode Toggle & User -->
+      <div class="sidebar-footer">
+        <!-- Dark Mode -->
+        <button
+          (click)="toggleDarkMode()"
+          class="btn-dark-mode"
+        >
+          <i class="fas" [class.fa-sun]="darkMode()" [class.fa-moon]="!darkMode()"></i>
+          <span>{{ darkMode() ? 'Mode Clair' : 'Mode Sombre' }}</span>
+        </button>
+
+        <!-- User Profile -->
+        <div class="user-profile">
+          <div class="user-avatar">
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="user-info">
+            <p class="user-name">{{ currentUser()?.name || currentUser()?.login || 'Utilisateur' }}</p>
+            <p class="user-role">{{ currentUser()?.roles?.[0] || 'Utilisateur' }}</p>
+          </div>
+          <button (click)="logout()" class="btn-logout" title="Déconnexion">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Top Bar -->
+    <div class="topbar">
+      <div class="topbar-inner">
+        <!-- Toggle Sidebar Button -->
+        <button
+          (click)="toggleSidebar()"
+          class="btn-toggle-sidebar"
+          title="Basculer le menu"
+        >
+          <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+          <div class="search-wrapper">
+            <input
+              type="text"
+              placeholder="Rechercher un patient, médecin..."
+              class="search-input"
+            />
+            <i class="fas fa-search search-icon"></i>
+          </div>
+        </div>
+
+        <!-- Right Actions -->
+        <div class="topbar-actions">
+          <!-- Notifications -->
+          <button class="btn-icon">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge"></span>
+          </button>
+
+          <!-- Messages -->
+          <button class="btn-icon">
+            <i class="fas fa-envelope"></i>
+            <span class="notification-badge"></span>
+          </button>
+
+          <!-- User Menu -->
+          <div class="user-menu">
+            <div class="user-menu-info">
+              <p class="user-menu-name">Dr. Dupont</p>
+              <p class="user-menu-role">Médecin</p>
+            </div>
+            <div class="user-menu-avatar">
+              <i class="fas fa-user"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page Content -->
+    <div class="page-content">
+      <!-- Header -->
+      <div class="content-header">
+        <h1 class="page-title">Tableau de Bord</h1>
+        <p class="page-subtitle">Bienvenue sur votre espace de gestion hospitalière</p>
+      </div>
+
+      <!-- Statistics Cards -->
+      <div class="stats-grid">
+        <!-- Card 1: Patients Totaux -->
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div>
+              <p class="stat-label">Patients Totaux</p>
+              <h3 class="stat-value">1,234</h3>
+            </div>
+            <div class="stat-icon stat-icon-blue">
+              <i class="fas fa-users"></i>
+            </div>
+          </div>
+          <div class="stat-footer">
+            <span class="stat-change stat-change-positive">+12%</span>
+            <span class="stat-period">ce mois</span>
+          </div>
+        </div>
+
+        <!-- Card 2: Lits Occupés -->
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div>
+              <p class="stat-label">Lits Occupés</p>
+              <h3 class="stat-value">456</h3>
+            </div>
+            <div class="stat-icon stat-icon-red">
+              <i class="fas fa-bed"></i>
+            </div>
+          </div>
+          <div class="stat-footer">
+            <span class="stat-change stat-change-danger">85%</span>
+            <span class="stat-period">d'occupation</span>
+          </div>
+        </div>
+
+        <!-- Card 3: Médecins Disponibles -->
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div>
+              <p class="stat-label">Médecins Disponibles</p>
+              <h3 class="stat-value">28</h3>
+            </div>
+            <div class="stat-icon stat-icon-green">
+              <i class="fas fa-stethoscope"></i>
+            </div>
+          </div>
+          <div class="stat-footer">
+            <span class="stat-change stat-change-positive">+3</span>
+            <span class="stat-period">depuis hier</span>
+          </div>
+        </div>
+
+        <!-- Card 4: Consultations Aujourd'hui -->
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div>
+              <p class="stat-label">Consultations</p>
+              <h3 class="stat-value">89</h3>
+            </div>
+            <div class="stat-icon stat-icon-yellow">
+              <i class="fas fa-calendar-check"></i>
+            </div>
+          </div>
+          <div class="stat-footer">
+            <span class="stat-change stat-change-warning">Aujourd'hui</span>
+            <span class="stat-period">en cours</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Section -->
+      <div class="charts-grid">
+        <!-- Chart 1: Patients par Département -->
+        <div class="chart-card chart-card-large">
+          <div class="chart-header">
+            <h3 class="chart-title">Patients par Département</h3>
+            <p class="chart-subtitle">Distribution des patients cette semaine</p>
+          </div>
+          <div class="chart-placeholder">
+            <i class="fas fa-chart-bar"></i>
+            <p>Graphique - Chart.js/ApexCharts</p>
+          </div>
+        </div>
+
+        <!-- Chart 2: Taux d'Occupation -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">Taux d'Occupation</h3>
+            <p class="chart-subtitle">Par étage</p>
+          </div>
+          <div class="occupation-list">
+            <!-- Floor 1 -->
+            <div class="occupation-item">
+              <div class="occupation-header">
+                <span class="occupation-label">Étage 1</span>
+                <span class="occupation-percent">85%</span>
+              </div>
+              <div class="occupation-bar">
+                <div class="occupation-fill" style="width: 85%"></div>
+              </div>
+            </div>
+
+            <!-- Floor 2 -->
+            <div class="occupation-item">
+              <div class="occupation-header">
+                <span class="occupation-label">Étage 2</span>
+                <span class="occupation-percent">72%</span>
+              </div>
+              <div class="occupation-bar">
+                <div class="occupation-fill" style="width: 72%"></div>
+              </div>
+            </div>
+
+            <!-- Floor 3 -->
+            <div class="occupation-item">
+              <div class="occupation-header">
+                <span class="occupation-label">Étage 3</span>
+                <span class="occupation-percent">91%</span>
+              </div>
+              <div class="occupation-bar">
+                <div class="occupation-fill" style="width: 91%"></div>
+              </div>
+            </div>
+
+            <!-- ICU -->
+            <div class="occupation-item">
+              <div class="occupation-header">
+                <span class="occupation-label">Soins Intensifs</span>
+                <span class="occupation-percent occupation-percent-full">100%</span>
+              </div>
+              <div class="occupation-bar">
+                <div class="occupation-fill occupation-fill-full" style="width: 100%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Patients Table -->
+      <div class="table-card">
+        <div class="table-header">
+          <div>
+            <h3 class="table-title">Patients Récents</h3>
+            <p class="table-subtitle">Dernières admissions</p>
+          </div>
+          <a href="#" class="table-link">
+            Voir tout <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="patients-table">
+            <thead>
+              <tr>
+                <th>Patient</th>
+                <th>Médecin</th>
+                <th>Département</th>
+                <th>Statut</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Row 1 -->
+              <tr>
+                <td>
+                  <div class="patient-cell">
+                    <div class="patient-avatar patient-avatar-1">JD</div>
+                    <div>
+                      <p class="patient-name">Jean Dupont</p>
+                      <p class="patient-age">45 ans</p>
+                    </div>
+                  </div>
+                </td>
+                <td>Dr. Marie Martin</td>
+                <td>Cardiologie</td>
+                <td>
+                  <span class="badge badge-success">
+                    <i class="fas fa-check-circle"></i>
+                    Admis
+                  </span>
+                </td>
+                <td>2024-01-15</td>
+              </tr>
+
+              <!-- Row 2 -->
+              <tr>
+                <td>
+                  <div class="patient-cell">
+                    <div class="patient-avatar patient-avatar-2">SL</div>
+                    <div>
+                      <p class="patient-name">Sophie Laurent</p>
+                      <p class="patient-age">32 ans</p>
+                    </div>
+                  </div>
+                </td>
+                <td>Dr. Pierre Blanc</td>
+                <td>Orthopédie</td>
+                <td>
+                  <span class="badge badge-warning">
+                    <i class="fas fa-clock"></i>
+                    En attente
+                  </span>
+                </td>
+                <td>2024-01-14</td>
+              </tr>
+
+              <!-- Row 3 -->
+              <tr>
+                <td>
+                  <div class="patient-cell">
+                    <div class="patient-avatar patient-avatar-3">MC</div>
+                    <div>
+                      <p class="patient-name">Marc Chevallier</p>
+                      <p class="patient-age">58 ans</p>
+                    </div>
+                  </div>
+                </td>
+                <td>Dr. Anne Rousseau</td>
+                <td>Pneumologie</td>
+                <td>
+                  <span class="badge badge-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Critique
+                  </span>
+                </td>
+                <td>2024-01-13</td>
+              </tr>
+
+              <!-- Row 4 -->
+              <tr>
+                <td>
+                  <div class="patient-cell">
+                    <div class="patient-avatar patient-avatar-4">NP</div>
+                    <div>
+                      <p class="patient-name">Nathalie Petit</p>
+                      <p class="patient-age">28 ans</p>
+                    </div>
+                  </div>
+                </td>
+                <td>Dr. Luc Moreau</td>
+                <td>Gynécologie</td>
+                <td>
+                  <span class="badge badge-success">
+                    <i class="fas fa-check-circle"></i>
+                    Admis
+                  </span>
+                </td>
+                <td>2024-01-12</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

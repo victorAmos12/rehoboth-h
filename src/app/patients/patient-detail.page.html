@@ -1,0 +1,211 @@
+<div class="p-6">
+  <!-- En-tête -->
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold text-[var(--color-text-primary)]">Détails du Patient</h1>
+    <p class="text-[var(--color-text-secondary)] mt-1">Informations complètes du patient</p>
+  </div>
+
+  <!-- Messages d'erreur -->
+  @if (error()) {
+    <div class="bg-red-100 border border-[var(--color-error)] text-[var(--color-error)] px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
+      <i class="fas fa-exclamation-circle"></i> {{ error() }}
+    </div>
+  }
+
+  <!-- Contenu -->
+  @if (loading()) {
+    <div class="card p-8 text-center text-[var(--color-text-muted)]">
+      <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+      <p>Chargement...</p>
+    </div>
+  } @else if (patient()) {
+    <div class="card overflow-hidden">
+      <!-- Informations Personnelles -->
+      <div class="p-6 border-b border-[var(--color-border-default)]">
+        <h2 class="text-lg font-semibold text-[var(--color-text-primary)] mb-4">Informations Personnelles</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <p class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">Nom</p>
+            <p class="text-[var(--color-text-primary)] font-medium mt-1">{{ patient()!.nom }}</p>
+          </div>
+          <div>
+            <p class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">Prénom</p>
+            <p class="text-[var(--color-text-primary)] font-medium mt-1">{{ patient()!.prenom }}</p>
+          </div>
+          <div>
+            <p class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">Date de Naissance</p>
+            <p class="text-[var(--color-text-primary)] font-medium mt-1">
+              {{ patient()!.dateNaissance }} ({{ calculateAge(patient()!.dateNaissance) }} ans)
+            </p>
+          </div>
+          <div>
+            <p class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">Sexe</p>
+            <p class="text-[var(--color-text-primary)] font-medium mt-1">
+              {{ patient()!.sexe === 'M' ? 'Masculin' : 'Féminin' }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coordonnées -->
+      <div class="p-6 border-b border-[var(--color-border-default)]">
+        <h2 class="text-lg font-semibold text-[var(--color-text-primary)] mb-4">Coordonnées</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <p class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">Email</p>
+            <p class="text-[var(--color-text-primary)] font-medium mt-1">
+              <a [href]="'mailto:' + patient()!.email" class="text-[var(--color-primary)] hover:text-[var(--color-primary-hover)]">
+                {{ patient()!.email }}
+              </a>
+            </p>
+          </div>
+          <div>
+            <p class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">Téléphone</p>
+            <p class="text-[var(--color-text-primary)] font-medium mt-1">
+              <a [href]="'tel:' + patient()!.telephone" class="text-[var(--color-primary)] hover:text-[var(--color-primary-hover)]">
+                {{ patient()!.telephone }}
+              </a>
+            </p>
+          </div>
+          @if (patient()!.adresse) {
+            <div>
+              <p class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">Adresse</p>
+              <p class="text-[var(--color-text-primary)] font-medium mt-1">{{ patient()!.adresse }}</p>
+            </div>
+          }
+          @if (patient()!.codePostal) {
+            <div>
+              <p class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">Code Postal</p>
+              <p class="text-[var(--color-text-primary)] font-medium mt-1">{{ patient()!.codePostal }}</p>
+            </div>
+          }
+          @if (patient()!.ville) {
+            <div>
+              <p class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">Ville</p>
+              <p class="text-[var(--color-text-primary)] font-medium mt-1">{{ patient()!.ville }}</p>
+            </div>
+          }
+          @if (patient()!.pays) {
+            <div>
+              <p class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">Pays</p>
+              <p class="text-[var(--color-text-primary)] font-medium mt-1">{{ patient()!.pays }}</p>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Informations Médicales -->
+      <div class="p-6 border-b border-[var(--color-border-default)]">
+        <h2 class="text-lg font-semibold text-[var(--color-text-primary)] mb-4">Informations Médicales</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          @if (patient()!.numeroSecuriteSociale) {
+            <div>
+              <p class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">Numéro de Sécurité Sociale</p>
+              <p class="text-[var(--color-text-primary)] font-medium mt-1">{{ patient()!.numeroSecuriteSociale }}</p>
+            </div>
+          }
+          @if (patient()!.groupeSanguin) {
+            <div>
+              <p class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">Groupe Sanguin</p>
+              <p class="text-[var(--color-text-primary)] font-medium mt-1">
+                <span class="badge badge-info">
+                  {{ patient()!.groupeSanguin }}
+                </span>
+              </p>
+            </div>
+          }
+          @if (patient()!.medecin_traitant) {
+            <div>
+              <p class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">Médecin Traitant</p>
+              <p class="text-[var(--color-text-primary)] font-medium mt-1">{{ patient()!.medecin_traitant }}</p>
+            </div>
+          }
+          <div>
+            <p class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">Hôpital ID</p>
+            <p class="text-[var(--color-text-primary)] font-medium mt-1">{{ patient()!.hopitalId }}</p>
+          </div>
+        </div>
+
+        @if (patient()!.allergies) {
+          <div class="mt-6">
+            <p class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide mb-2">Allergies</p>
+            <p class="text-[var(--color-text-primary)] font-medium whitespace-pre-wrap">{{ patient()!.allergies }}</p>
+          </div>
+        }
+
+        @if (patient()!.antecedentsMedicaux) {
+          <div class="mt-6">
+            <p class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide mb-2">Antécédents Médicaux</p>
+            <p class="text-[var(--color-text-primary)] font-medium whitespace-pre-wrap">{{ patient()!.antecedentsMedicaux }}</p>
+          </div>
+        }
+      </div>
+
+      <!-- Statut -->
+      <div class="p-6 border-b border-[var(--color-border-default)]">
+        <h2 class="text-lg font-semibold text-[var(--color-text-primary)] mb-4">Statut</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <p class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">Statut</p>
+            <p class="text-[var(--color-text-primary)] font-medium mt-1">
+              <span
+                [class]="patient()!.actif ? 'badge badge-success' : 'badge badge-error'"
+              >
+                {{ patient()!.actif ? 'Actif' : 'Inactif' }}
+              </span>
+            </p>
+          </div>
+          @if (patient()!.createdAt) {
+            <div>
+              <p class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">Créé le</p>
+              <p class="text-[var(--color-text-primary)] font-medium mt-1">{{ patient()!.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+            </div>
+          }
+          @if (patient()!.updatedAt) {
+            <div>
+              <p class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">Modifié le</p>
+              <p class="text-[var(--color-text-primary)] font-medium mt-1">{{ patient()!.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="bg-[var(--color-bg-hover)] p-6 flex flex-wrap gap-3">
+        <button
+          *appCan="['patients','update']"
+          (click)="editPatient()"
+          class="btn btn-primary"
+        >
+          <i class="fas fa-edit"></i> Modifier
+        </button>
+        <button
+          *appCan="['patients','export']"
+          (click)="exportPDF()"
+          class="btn btn-secondary"
+        >
+          <i class="fas fa-file-pdf"></i> Export Fiche PDF
+        </button>
+        <button
+          *appCan="['dossiers_medicaux','read']"
+          (click)="exportDossierMedical()"
+          class="btn btn-secondary"
+        >
+          <i class="fas fa-folder-medical"></i> Export Dossier Médical
+        </button>
+        <button
+          *appCan="['patients','delete']"
+          (click)="deletePatient()"
+          class="btn btn-secondary"
+        >
+          <i class="fas fa-trash"></i> Supprimer
+        </button>
+      </div>
+    </div>
+  } @else {
+    <div class="card p-8 text-center text-[var(--color-text-muted)]">
+      <i class="fas fa-inbox text-4xl mb-2"></i>
+      <p>Patient non trouvé</p>
+    </div>
+  }
+</div>

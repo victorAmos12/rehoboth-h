@@ -1,0 +1,179 @@
+<div class="flex h-screen bg-[var(--color-bg-main)] transition-colors duration-300">
+  <!-- Sidebar -->
+  <aside
+    class="fixed left-0 top-0 h-screen w-64 bg-[var(--color-bg-surface)] shadow-lg transition-all duration-300 z-40 border-r border-[var(--color-border-default)]"
+    [class.translate-x-0]="sidebarOpen()"
+    [class.-translate-x-full]="!sidebarOpen()"
+  >
+    <div class="flex flex-col h-full">
+      <!-- Logo -->
+      <div class="p-6 border-b border-[var(--color-border-default)]">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-[var(--color-primary)] rounded-lg flex items-center justify-center text-white">
+            <i class="fas fa-hospital text-lg"></i>
+          </div>
+          <div>
+            <h1 class="text-lg font-bold text-[var(--color-text-primary)]">Rehoboth</h1>
+            <p class="text-xs text-[var(--color-text-muted)]">Gestion Hospitalière</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Menu -->
+      <nav class="flex-1 overflow-y-auto p-4">
+        @if (menus().length === 0) {
+          <div class="text-center text-[var(--color-text-muted)] py-8">
+            <i class="fas fa-exclamation-circle text-2xl mb-2"></i>
+            <p class="text-sm">Aucun menu chargé</p>
+          </div>
+        }
+
+        @for (menu of menus(); track menu.id) {
+          @if (!menu.children || menu.children.length === 0) {
+            <!-- Menu simple -->
+            <a
+              [routerLink]="menu.path"
+              class="flex items-center gap-3 px-4 py-3 rounded-lg text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] transition-colors mb-2"
+            >
+              <i [class]="'fas ' + (menu.icon || 'fa-circle')" class="w-5 text-center text-[var(--color-primary)]"></i>
+              <span class="text-sm font-medium">{{ menu.label }}</span>
+            </a>
+          } @else {
+            <!-- Menu avec enfants -->
+            <div class="mb-2">
+              @if (menu.section) {
+                <p class="px-4 py-2 text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
+                  {{ menu.section }}
+                </p>
+              }
+              <button
+                (click)="toggleMenu(menu.id)"
+                class="w-full flex items-center justify-between px-4 py-3 rounded-lg text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] transition-colors"
+                [class.bg-[var(--color-primary-soft)]]="isMenuExpanded(menu.id)"
+              >
+                <div class="flex items-center gap-3">
+                  <i [class]="'fas ' + (menu.icon || 'fa-circle')" class="w-5 text-center text-[var(--color-primary)]"></i>
+                  <span class="text-sm font-medium">{{ menu.label }}</span>
+                </div>
+                <i
+                  class="fas fa-chevron-down text-xs transition-transform duration-300"
+                  [class.rotate-180]="isMenuExpanded(menu.id)"
+                ></i>
+              </button>
+
+              <!-- Sous-menus -->
+              @if (isMenuExpanded(menu.id)) {
+                <div class="ml-4 mt-2 space-y-1">
+                  @for (child of menu.children; track child.id) {
+                    <a
+                      [routerLink]="child.path"
+                      class="flex items-center gap-3 px-4 py-2 rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-bg-hover)] transition-colors text-sm"
+                    >
+                      <i [class]="'fas ' + (child.icon || 'fa-circle')" class="w-4 text-center text-[var(--color-primary)]"></i>
+                      <span>{{ child.label }}</span>
+                    </a>
+                  }
+                </div>
+              }
+            </div>
+          }
+        }
+      </nav>
+
+      <!-- Footer -->
+      <div class="p-4 border-t border-[var(--color-border-default)] space-y-3">
+        <!-- Dark Mode Toggle -->
+        <button
+          (click)="toggleDarkMode()"
+          class="w-full flex items-center justify-between px-4 py-2 rounded-lg bg-[var(--color-bg-hover)] text-[var(--color-text-secondary)] hover:bg-[var(--color-border-default)] transition-colors text-sm"
+        >
+          <span>{{ darkMode() ? 'Mode Clair' : 'Mode Sombre' }}</span>
+          <i [class]="darkMode() ? 'fas fa-sun' : 'fas fa-moon'"></i>
+        </button>
+
+        <!-- User Profile -->
+        <div class="px-4 py-3 bg-[var(--color-bg-hover)] rounded-lg">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3 flex-1">
+              <div class="w-8 h-8 bg-[var(--color-primary)] rounded-full flex items-center justify-center text-white text-sm font-bold">
+                {{ (currentUser()?.name || currentUser()?.login || 'U').charAt(0).toUpperCase() }}
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-[var(--color-text-primary)] truncate">
+                  {{ currentUser()?.name || currentUser()?.login || 'Utilisateur' }}
+                </p>
+                <p class="text-xs text-[var(--color-text-muted)] truncate">
+                  {{ currentUser()?.roles?.[0] || 'Utilisateur' }}
+                </p>
+              </div>
+            </div>
+            <button
+              (click)="logout()"
+              class="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-error)] transition-colors"
+              title="Déconnexion"
+            >
+              <i class="fas fa-sign-out-alt"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col" [class.ml-64]="sidebarOpen()" [class.ml-0]="!sidebarOpen()">
+    <!-- Top Bar -->
+    <div class="bg-[var(--color-bg-surface)] border-b border-[var(--color-border-default)] shadow-sm sticky top-0 z-30">
+      <div class="flex items-center justify-between px-6 py-4">
+        <!-- Toggle Sidebar Button -->
+        <button
+          (click)="toggleSidebar()"
+          class="p-2 text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] rounded-lg transition-colors"
+          title="Basculer le menu"
+        >
+          <i class="fas fa-bars text-lg"></i>
+        </button>
+
+        <!-- Search Bar -->
+        <div class="flex-1 mx-6 max-w-md">
+          <div class="relative">
+            <input
+              type="text"
+              placeholder="Rechercher..."
+              class="w-full px-4 py-2 bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] placeholder-[var(--color-text-muted)]"
+            />
+            <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-[var(--color-text-muted)]"></i>
+          </div>
+        </div>
+
+        <!-- Right Actions -->
+        <div class="flex items-center gap-4">
+          <!-- Notifications -->
+          <button class="relative p-2 text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] rounded-lg transition-colors">
+            <i class="fas fa-bell text-lg"></i>
+            <span class="absolute top-1 right-1 w-2 h-2 bg-[var(--color-error)] rounded-full"></span>
+          </button>
+
+          <!-- Messages -->
+          <button class="relative p-2 text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] rounded-lg transition-colors">
+            <i class="fas fa-envelope text-lg"></i>
+            <span class="absolute top-1 right-1 w-2 h-2 bg-[var(--color-error)] rounded-full"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page Content -->
+    <div class="flex-1 overflow-auto">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+
+  <!-- Mobile Overlay -->
+  @if (sidebarOpen()) {
+    <div
+      class="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+      (click)="toggleSidebar()"
+    ></div>
+  }
+</div>

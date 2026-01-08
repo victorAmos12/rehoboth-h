@@ -1,0 +1,250 @@
+<div class="p-6">
+  <div class="flex items-center justify-between gap-4 mb-6">
+    <div class="flex items-center gap-3">
+      <button
+        (click)="goBack()"
+        class="px-3 py-2 rounded-lg border border-[var(--color-border-default)] hover:bg-[var(--color-bg-hover)]"
+      >
+        Retour
+      </button>
+      <div>
+        <h1 class="text-2xl font-semibold text-[var(--color-text-primary)]">
+          {{ loading() ? 'Chargement...' : (user() ? 'Modifier l\'utilisateur' : 'Créer un utilisateur') }}
+        </h1>
+        <p class="text-sm text-[var(--color-text-muted)]">Ressources humaines / Utilisateurs</p>
+      </div>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="mb-4 p-3 rounded-lg bg-red-50 text-red-700 border border-red-200">{{ error() }}</div>
+  }
+
+  @if (loading()) {
+    <div class="flex items-center justify-center py-12">
+      <div class="flex flex-col items-center gap-3">
+        <div class="w-8 h-8 border-4 border-[var(--color-border-default)] border-t-[var(--color-primary)] rounded-full animate-spin"></div>
+        <p class="text-[var(--color-text-muted)]">Chargement des données…</p>
+      </div>
+    </div>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="submit()" class="max-w-4xl">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Identité Section -->
+        <div class="lg:col-span-2 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] p-5">
+          <h2 class="text-lg font-semibold text-[var(--color-text-primary)] mb-4">Identité</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Nom *</label>
+              <input
+                type="text"
+                formControlName="nom"
+                class="w-full px-3 py-2 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-input)] text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                placeholder="Nom"
+              />
+              @if (form.get('nom')?.invalid && form.get('nom')?.touched) {
+                <p class="text-xs text-red-600 mt-1">Le nom est requis (min. 2 caractères)</p>
+              }
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Prénom *</label>
+              <input
+                type="text"
+                formControlName="prenom"
+                class="w-full px-3 py-2 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-input)] text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                placeholder="Prénom"
+              />
+              @if (form.get('prenom')?.invalid && form.get('prenom')?.touched) {
+                <p class="text-xs text-red-600 mt-1">Le prénom est requis (min. 2 caractères)</p>
+              }
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Email *</label>
+              <input
+                type="email"
+                formControlName="email"
+                class="w-full px-3 py-2 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-input)] text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                placeholder="Email"
+              />
+              @if (form.get('email')?.invalid && form.get('email')?.touched) {
+                <p class="text-xs text-red-600 mt-1">Email valide requis</p>
+              }
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Login *</label>
+              <input
+                type="text"
+                formControlName="login"
+                class="w-full px-3 py-2 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-input)] text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                placeholder="Login"
+              />
+              @if (form.get('login')?.invalid && form.get('login')?.touched) {
+                <p class="text-xs text-red-600 mt-1">Le login est requis (min. 3 caractères)</p>
+              }
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Téléphone</label>
+              <input
+                type="tel"
+                formControlName="telephone"
+                class="w-full px-3 py-2 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-input)] text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                placeholder="Téléphone"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Informations Personnelles Section -->
+        <div class="lg:col-span-2 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] p-5">
+          <h2 class="text-lg font-semibold text-[var(--color-text-primary)] mb-4">Informations personnelles</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Adresse</label>
+              <input
+                type="text"
+                formControlName="adresse"
+                class="w-full px-3 py-2 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-input)] text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                placeholder="Adresse"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Ville</label>
+              <input
+                type="text"
+                formControlName="ville"
+                class="w-full px-3 py-2 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-input)] text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                placeholder="Ville"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Code postal</label>
+              <input
+                type="text"
+                formControlName="code_postal"
+                class="w-full px-3 py-2 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-input)] text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                placeholder="Code postal"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Date de naissance</label>
+              <input
+                type="date"
+                formControlName="date_naissance"
+                class="w-full px-3 py-2 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-input)] text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Sexe</label>
+              <select
+                formControlName="sexe"
+                class="w-full px-3 py-2 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-input)] text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              >
+                <option value="">Sélectionner</option>
+                <option value="M">Masculin</option>
+                <option value="F">Féminin</option>
+                <option value="O">Autre</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Nationalité</label>
+              <input
+                type="text"
+                formControlName="nationalite"
+                class="w-full px-3 py-2 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-input)] text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                placeholder="Nationalité"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Numéro d'identité</label>
+              <input
+                type="text"
+                formControlName="numero_identite"
+                class="w-full px-3 py-2 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-input)] text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                placeholder="Numéro d'identité"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Type d'identité</label>
+              <select
+                formControlName="type_identite"
+                class="w-full px-3 py-2 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-input)] text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              >
+                <option value="">Sélectionner</option>
+                <option value="CNI">CNI</option>
+                <option value="PASSPORT">Passeport</option>
+                <option value="PERMIS">Permis de conduire</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Informations Professionnelles Section -->
+        <div class="lg:col-span-2 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] p-5">
+          <h2 class="text-lg font-semibold text-[var(--color-text-primary)] mb-4">Informations professionnelles</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Numéro de licence</label>
+              <input
+                type="text"
+                formControlName="numero_licence"
+                class="w-full px-3 py-2 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-input)] text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                placeholder="Numéro de licence"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Numéro d'ordre</label>
+              <input
+                type="text"
+                formControlName="numero_ordre"
+                class="w-full px-3 py-2 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-input)] text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                placeholder="Numéro d'ordre"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Date d'embauche *</label>
+              <input
+                type="date"
+                formControlName="date_embauche"
+                class="w-full px-3 py-2 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-input)] text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              />
+              @if (form.get('date_embauche')?.invalid && form.get('date_embauche')?.touched) {
+                <p class="text-xs text-red-600 mt-1">La date d'embauche est requise</p>
+              }
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-[var(--color-text-primary)] mb-1">Bio</label>
+              <textarea
+                formControlName="bio"
+                rows="3"
+                class="w-full px-3 py-2 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-input)] text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                placeholder="Bio"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="flex gap-3 mt-6">
+        <button
+          type="submit"
+          [disabled]="isSubmitDisabled"
+          class="px-6 py-2 rounded-lg bg-[var(--color-primary)] text-white hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+        >
+          @if (submitting()) {
+            <span class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+          }
+          {{ user() ? 'Mettre à jour' : 'Créer' }}
+        </button>
+        <button
+          type="button"
+          (click)="goBack()"
+          [disabled]="submitting()"
+          class="px-6 py-2 rounded-lg border border-[var(--color-border-default)] hover:bg-[var(--color-bg-hover)] transition disabled:opacity-50 font-medium"
+        >
+          Annuler
+        </button>
+      </div>
+    </form>
+  }
+</div>

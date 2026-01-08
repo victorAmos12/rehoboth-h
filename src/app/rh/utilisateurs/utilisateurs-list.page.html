@@ -1,0 +1,161 @@
+<div class="p-6">
+  <div class="flex items-start justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-2xl font-semibold text-[var(--color-text-primary)]">Utilisateurs</h1>
+      <p class="text-sm text-[var(--color-text-muted)]">Ressources humaines / Utilisateurs</p>
+    </div>
+
+    @if (canManageUsers()) {
+      <a
+        routerLink="/rh/utilisateurs/create"
+        class="px-4 py-2 rounded-lg bg-[var(--color-primary)] text-white hover:opacity-90 transition"
+      >
+        Nouvel utilisateur
+      </a>
+    }
+  </div>
+
+  <div class="rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] p-4 mb-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+      <div class="md:col-span-2">
+        <label class="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Recherche</label>
+        <input
+          class="w-full px-3 py-2 rounded-lg border border-[var(--color-border-default)] bg-transparent"
+          [(ngModel)]="q"
+          (ngModelChange)="onSearchChange()"
+          placeholder="Nom, prénom, email, login…"
+        />
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Statut</label>
+        <select
+          class="w-full px-3 py-2 rounded-lg border border-[var(--color-border-default)] bg-transparent"
+          [(ngModel)]="actif"
+          (ngModelChange)="load()"
+        >
+          <option [ngValue]="''">Tous</option>
+          <option [ngValue]="true">Actifs</option>
+          <option [ngValue]="false">Inactifs</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Export Buttons -->
+    <div class="flex gap-2 flex-wrap">
+      <button
+        (click)="exportPDF('list')"
+        [disabled]="exporting()"
+        class="px-3 py-2 rounded-lg border border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100 transition text-sm font-medium disabled:opacity-50 flex items-center gap-2"
+      >
+        @if (exporting()) {
+          <span class="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+        } @else {
+          <i class="fas fa-file-pdf"></i>
+        }
+        Export PDF (Liste)
+      </button>
+      <button
+        (click)="exportPDF('detailed')"
+        [disabled]="exporting()"
+        class="px-3 py-2 rounded-lg border border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition text-sm font-medium disabled:opacity-50 flex items-center gap-2"
+      >
+        @if (exporting()) {
+          <span class="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+        } @else {
+          <i class="fas fa-file-pdf"></i>
+        }
+        Export PDF (Détaillé)
+      </button>
+      <button
+        (click)="exportCSV()"
+        [disabled]="exporting()"
+        class="px-3 py-2 rounded-lg border border-green-300 bg-green-50 text-green-700 hover:bg-green-100 transition text-sm font-medium disabled:opacity-50 flex items-center gap-2"
+      >
+        @if (exporting()) {
+          <span class="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+        } @else {
+          <i class="fas fa-file-csv"></i>
+        }
+        Export CSV
+      </button>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="mb-4 p-3 rounded-lg bg-red-50 text-red-700 border border-red-200">{{ error() }}</div>
+  }
+
+  @if (loading()) {
+    <div class="text-[var(--color-text-muted)]">Chargement…</div>
+  } @else {
+    <div class="overflow-x-auto rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-surface)]">
+      <table class="min-w-full">
+        <thead class="bg-[var(--color-bg-hover)]">
+          <tr>
+            <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Utilisateur</th>
+            <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Rôle</th>
+            <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Hôpital</th>
+            <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Statut</th>
+            <th class="text-right text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (u of users(); track u.id) {
+            <tr class="border-t border-[var(--color-border-default)] hover:bg-[var(--color-bg-hover)]">
+              <td class="px-4 py-3">
+                <div class="text-sm font-semibold text-[var(--color-text-primary)]">{{ u.prenom }} {{ u.nom }}</div>
+                <div class="text-xs text-[var(--color-text-muted)]">{{ u.email }} • {{ u.login }}</div>
+              </td>
+              <td class="px-4 py-3 text-sm text-[var(--color-text-secondary)]">{{ u.role?.nom || u.role?.code || '-' }}</td>
+              <td class="px-4 py-3 text-sm text-[var(--color-text-secondary)]">{{ u.hopital?.nom || '-' }}</td>
+              <td class="px-4 py-3">
+                <span
+                  class="inline-flex items-center px-2 py-1 rounded-full text-xs"
+                  [class.bg-green-100]="u.actif"
+                  [class.text-green-700]="u.actif"
+                  [class.bg-gray-100]="!u.actif"
+                  [class.text-gray-700]="!u.actif"
+                >
+                  {{ u.actif ? 'Actif' : 'Inactif' }}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-right">
+                <a class="text-sm text-[var(--color-primary)] hover:underline" [routerLink]="['/rh/utilisateurs', u.id]">Voir</a>
+              </td>
+            </tr>
+          }
+
+          @if (users().length === 0) {
+            <tr>
+              <td class="px-4 py-6 text-center text-sm text-[var(--color-text-muted)]" colspan="5">
+                Aucun utilisateur
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="flex items-center justify-between mt-4 text-sm text-[var(--color-text-muted)]">
+      <div>
+        Page {{ page() }} / {{ pages() }} • Total: {{ total() }}
+      </div>
+      <div class="flex gap-2">
+        <button
+          class="px-3 py-1 rounded border border-[var(--color-border-default)] hover:bg-[var(--color-bg-hover)] disabled:opacity-50"
+          (click)="prev()"
+          [disabled]="page() <= 1"
+        >
+          Précédent
+        </button>
+        <button
+          class="px-3 py-1 rounded border border-[var(--color-border-default)] hover:bg-[var(--color-bg-hover)] disabled:opacity-50"
+          (click)="next()"
+          [disabled]="page() >= pages()"
+        >
+          Suivant
+        </button>
+      </div>
+    </div>
+  }
+</div>
