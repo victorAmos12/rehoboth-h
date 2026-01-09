@@ -92,7 +92,7 @@ export class PatientsListPage implements OnInit {
 
     if (this.searchNom()) criteria.nom = this.searchNom();
     if (this.searchPrenom()) criteria.prenom = this.searchPrenom();
-    if (this.searchHopital()) criteria.hopitalId = this.searchHopital()!;
+    if (this.searchHopital()) criteria.hopital_id = this.searchHopital()!;
     if (this.searchGroupeSanguin()) criteria.groupeSanguin = this.searchGroupeSanguin();
     if (this.searchActif() !== null) criteria.actif = this.searchActif()!;
 

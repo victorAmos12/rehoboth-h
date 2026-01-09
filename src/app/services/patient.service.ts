@@ -20,7 +20,7 @@ export interface Patient {
   groupeSanguin?: string;
   allergies?: string;
   antecedentsMedicaux?: string;
-  hopitalId: number;
+  hopital_id: number;
   medecin_traitant?: string;
   actif: boolean;
   createdAt?: string;
@@ -65,7 +65,7 @@ export interface PatientStatsResponse {
 export interface SearchCriteria {
   nom?: string;
   prenom?: string;
-  hopitalId?: number;
+  hopital_id?: number;
   groupeSanguin?: string;
   allergies?: string;
   medecin_traitant?: string;
@@ -101,16 +101,16 @@ export class PatientService {
     console.log('normalizePatient - infoMedicales:', infoMedicales);
     console.log('normalizePatient - infoPersonnelles:', infoPersonnelles);
 
-    // Chercher hopitalId
-    let hopitalId = 1;
+    // Chercher hopital_id
+    let hopital_id = 1;
     if (infoAdmin.hopital) {
-      hopitalId = typeof infoAdmin.hopital === 'object' ? infoAdmin.hopital.id || 1 : infoAdmin.hopital;
-    } else if (data.hopitalId) {
-      hopitalId = typeof data.hopitalId === 'object' ? data.hopitalId.id || 1 : data.hopitalId;
+      hopital_id = typeof infoAdmin.hopital === 'object' ? infoAdmin.hopital.id || 1 : infoAdmin.hopital;
     } else if (data.hopital_id) {
-      hopitalId = typeof data.hopital_id === 'object' ? data.hopital_id.id || 1 : data.hopital_id;
+      hopital_id = typeof data.hopital_id === 'object' ? data.hopital_id.id || 1 : data.hopital_id;
+    } else if (data.hopital_id) {
+      hopital_id = typeof data.hopital_id === 'object' ? data.hopital_id.id || 1 : data.hopital_id;
     } else if (data.hospital_id) {
-      hopitalId = typeof data.hospital_id === 'object' ? data.hospital_id.id || 1 : data.hospital_id;
+      hopital_id = typeof data.hospital_id === 'object' ? data.hospital_id.id || 1 : data.hospital_id;
     }
 
     const normalized = {
@@ -129,13 +129,13 @@ export class PatientService {
       groupeSanguin: infoMedicales.groupe_sanguin || data.groupeSanguin || data.blood_group || data.groupe_sanguin || '',
       allergies: infoMedicales.allergies || data.allergies || data.allergies_list || '',
       antecedentsMedicaux: infoMedicales.antecedents_medicaux || data.antecedentsMedicaux || data.medical_history || data.antecedents_medicaux || '',
-      hopitalId,
+      hopital_id,
       medecin_traitant: infoMedicales.medecin_traitant || infoMedicales.treating_doctor || data.medecin_traitant || data.treating_doctor || data.doctor || data.medecin || '',
       actif: data.actif !== undefined ? data.actif : data.active !== undefined ? data.active : data.is_active !== undefined ? data.is_active : true,
       createdAt: historique.date_creation || data.createdAt || data.created_at || data.dateCreation || data.date_creation || '',
       updatedAt: historique.date_modification || data.updatedAt || data.updated_at || data.dateModification || data.date_modification || '',
     };
-    console.log('normalizePatient - result:', normalized);
+    // console.log('normalizePatient - result:', normalized);
     return normalized;
   }
 
@@ -267,10 +267,10 @@ export class PatientService {
   /**
    * Exporter les patients en CSV
    */
-  exportCSV(hopitalId?: number, actif?: boolean): Observable<Blob> {
+  exportCSV(hopital_id?: number, actif?: boolean): Observable<Blob> {
     let params = new HttpParams();
-    if (hopitalId !== undefined) {
-      params = params.set('hopitalId', hopitalId.toString());
+    if (hopital_id !== undefined) {
+      params = params.set('hopital_id', hopital_id.toString());
     }
     if (actif !== undefined) {
       params = params.set('actif', actif.toString());
@@ -306,10 +306,10 @@ export class PatientService {
   /**
    * Obtenir les patients par hôpital
    */
-  getPatientsByHopital(hopitalId: number, page: number = 1, limit: number = 10): Observable<PatientsListResponse> {
+  getPatientsByHopital(hopital_id: number, page: number = 1, limit: number = 10): Observable<PatientsListResponse> {
     let params = new HttpParams().set('page', page.toString()).set('limit', limit.toString());
 
-    return this.http.get<PatientsListResponse>(`${this.apiUrl}/hopital/${hopitalId}`, {
+    return this.http.get<PatientsListResponse>(`${this.apiUrl}/hopital/${hopital_id}`, {
       headers: this.getHeaders(),
       params,
     });

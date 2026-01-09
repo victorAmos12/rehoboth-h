@@ -221,9 +221,9 @@
             <label class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">Hôpital *</label>
             <input
               type="number"
-              [value]="formData().hopitalId || 1"
-              (change)="updatePatient('hopitalId', $event)"
-              name="hopitalId"
+              [value]="formData().hopital_id || 1"
+              (change)="updatePatient('hopital_id', $event)"
+              name="hopital_id"
               class="w-full"
               required
             />

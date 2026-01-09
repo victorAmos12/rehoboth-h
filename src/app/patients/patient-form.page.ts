@@ -19,7 +19,7 @@ export class PatientFormPage implements OnInit {
     sexe: 'M',
     email: '',
     telephone: '',
-    hopitalId: 1,
+    hopital_id: 1,
     actif: true,
   });
 
@@ -108,6 +108,15 @@ export class PatientFormPage implements OnInit {
         },
       });
     } else {
+
+      // // Changement du champs hopitalId en entier hopital_id
+      // const payload = {
+      //   ...data,
+      //   hopital_id: data.hopitalId,
+      // };
+      // delete (payload as any).hopitalId;
+    
+      // Envoie des données au service avec le payload modifié
       this.patientService.createPatient(data).subscribe({
         next: () => {
           this.success.set('Patient créé avec succès');
@@ -133,7 +142,7 @@ export class PatientFormPage implements OnInit {
     const current = this.formData();
     const newValue = value.target?.value !== undefined ? value.target.value : value;
     const finalValue =
-      field === 'hopitalId'
+      field === 'hopital_id'
         ? parseInt(newValue, 10)
         : field === 'actif'
           ? value.target?.checked
