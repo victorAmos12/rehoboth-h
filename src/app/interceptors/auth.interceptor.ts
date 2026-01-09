@@ -33,18 +33,21 @@ export class AuthInterceptor implements HttpInterceptor {
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401) {
           // Token expiré ou invalide
-          this.authService.logout();
-          
-          // Afficher un message d'expiration
-          this.toastService.error(
-            'Votre session a expiré. Veuillez vous reconnecter.',
-            7000
-          );
-          
-          // Rediriger vers login avec un paramètre pour afficher le message
-          this.router.navigate(['/login'], {
-            queryParams: { expired: true },
-          });
+          // Vérifier si on n'est pas déjà en train de se déconnecter
+          if (this.authService.isAuthenticated()) {
+            this.authService.logout();
+            
+            // Afficher un message d'expiration
+            this.toastService.error(
+              'Votre session a expiré. Veuillez vous reconnecter.',
+              7000
+            );
+            
+            // Rediriger vers login avec un paramètre pour afficher le message
+            this.router.navigate(['/login'], {
+              queryParams: { expired: true },
+            });
+          }
         } else if (error.status === 403) {
           // Accès refusé
           this.toastService.error(

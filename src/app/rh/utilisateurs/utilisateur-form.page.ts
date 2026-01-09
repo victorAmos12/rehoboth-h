@@ -1,14 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { UtilisateursService, UtilisateurDetail } from './services/utilisateurs.service';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-utilisateur-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './utilisateur-form.page.html',
   styleUrls: ['./utilisateur-form.page.css'],
 })

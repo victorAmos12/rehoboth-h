@@ -146,7 +146,7 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return !!this.authToken();
+    return !!this.getAuthToken();
   }
 
   public mapApiMenuItemToMenuItem(api: ApiMenuItem): MenuItem {
@@ -349,7 +349,7 @@ export class AuthService {
   }
 
   loadMenus(): Observable<MenuResponse> {
-    const token = this.authToken();
+    const token = this.getAuthToken();
     console.log('AuthService: loadMenus() appelé avec token:', token ? 'présent' : 'absent');
 
     // Si pas de token, retourner une réponse vide

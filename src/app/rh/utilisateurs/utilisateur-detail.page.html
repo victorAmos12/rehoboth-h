@@ -66,15 +66,15 @@
           </div>
           <div>
             <div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Hôpital</div>
-            <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ user()!.informations_administratives.hopital?.nom || '-' }}</div>
+            <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ user()!.informations_administratives.hopital.nom || '-' }}</div>
           </div>
           <div>
             <div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Rôle</div>
-            <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ user()!.informations_administratives.role?.nom || user()!.informations_administratives.role?.code || '-' }}</div>
+            <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ user()!.informations_administratives.role.nom || user()!.informations_administratives.role.code || '-' }}</div>
           </div>
           <div>
             <div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Profil</div>
-            <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ user()!.informations_administratives.profil?.nom || user()!.informations_administratives.profil?.code || '-' }}</div>
+            <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ user()!.informations_administratives.profil.nom || user()!.informations_administratives.profil.code || '-' }}</div>
           </div>
           <div>
             <div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Spécialité</div>

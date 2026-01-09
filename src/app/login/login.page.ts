@@ -1,11 +1,19 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, signal, OnInit, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../services/auth.service';
+import { GoogleAuthService } from '../services/google-auth.service';
+
+declare global {
+  interface Window {
+    google: any;
+    handleGoogleCredential?: (response: any) => void;
+  }
+}
 
 type ApiViolation = { propertyPath?: string; message?: string };
 
@@ -37,7 +45,7 @@ type LoginResponse = {
   imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink],
   templateUrl: './login.page.html',
 })
-export class LoginPage {
+export class LoginPage implements OnInit, OnDestroy {
   private readonly apiUrl = `${environment.apiUrl}/api/auth/login`;
 
   protected readonly isSubmitting = signal(false);
@@ -48,6 +56,8 @@ export class LoginPage {
   protected readonly twoFAUserId = signal<number | null>(null);
   protected readonly twoFACode = signal('');
   protected readonly verifying2FA = signal(false);
+  protected readonly isGoogleLoading = signal(false);
+  protected readonly googleClientId = signal<string>('');
 
   protected readonly form = new FormGroup({
     login: new FormControl('', {
@@ -68,8 +78,65 @@ export class LoginPage {
   constructor(
     private readonly http: HttpClient,
     private readonly router: Router,
-    private readonly authService: AuthService
-  ) {}
+    private readonly authService: AuthService,
+    private readonly googleAuthService: GoogleAuthService
+  ) {
+    this.googleClientId.set(this.googleAuthService.getGoogleClientId());
+  }
+
+  ngOnInit(): void {
+    // Initialiser le bouton Google une seule fois au démarrage du composant
+    this.initializeGoogleButton();
+  }
+
+  ngOnDestroy(): void {
+    // Cleanup si nécessaire
+  }
+
+  /**
+   * Initialise le bouton Google au démarrage du composant
+   */
+  private initializeGoogleButton(): void {
+    // Attendre que Google soit chargé
+    const checkGoogleInterval = setInterval(() => {
+      if (window.google && this.googleClientId()) {
+        clearInterval(checkGoogleInterval);
+        
+        try {
+          // Initialiser Google avec le callback
+          // IMPORTANT: use_fedcm_for_button: false pour éviter les problèmes COOP
+          window.google.accounts.id.initialize({
+            client_id: this.googleClientId(),
+            callback: this.handleGoogleToken.bind(this),
+            use_fedcm_for_button: false,  // Désactiver FedCM pour éviter les erreurs COOP
+          });
+
+          // Rendre le bouton dans le conteneur
+          const container = document.getElementById('google-signin-button-render');
+          if (container) {
+            window.google.accounts.id.renderButton(container, {
+              type: 'standard',
+              theme: 'outline',
+              size: 'large',
+              width: '300',
+              locale: 'fr',
+              text: 'signin_with',
+            });
+            console.log('Bouton Google rendu avec succès');
+          } else {
+            console.warn('Conteneur Google non trouvé');
+          }
+        } catch (error) {
+          console.error('Erreur lors de l\'initialisation Google:', error);
+        }
+      }
+    }, 100);
+
+    // Arrêter après 5 secondes
+    setTimeout(() => {
+      clearInterval(checkGoogleInterval);
+    }, 5000);
+  }
 
   protected onSubmit(): void {
     this.apiError.set(null);
@@ -83,8 +150,12 @@ export class LoginPage {
 
     this.isSubmitting.set(true);
 
+    const loginValue = this.form.controls.login.value;
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginValue);
+
     const payload = {
-      login: this.form.controls.login.value,
+      login: loginValue,
+      email: isEmail ? loginValue : undefined,
       password: this.form.controls.password.value,
     };
 
@@ -239,8 +310,88 @@ export class LoginPage {
   }
 
   protected onGoogleSignIn(): void {
+    // Le bouton Google natif gère le flux automatiquement
+    // Cette méthode n'est là que pour compatibilité avec le template
+    console.log('Flux Google Sign-In déclenché par le bouton natif');
+  }
+  private handleGoogleToken(response: any): void {
+    this.isGoogleLoading.set(true);
     this.apiError.set(null);
-    this.apiError.set('🚀 Connexion Google en cours de développement. Cette fonctionnalité sera bientôt disponible.');
+
+    // La réponse du callback contient credential (le JWT)
+    const token = response?.credential;
+    
+    if (!token) {
+      this.isGoogleLoading.set(false);
+      this.apiError.set('Erreur: Impossible d\'obtenir le token Google.');
+      return;
+    }
+
+    this.googleAuthService.loginWithGoogle(token).subscribe({
+      next: (res) => {
+        const authToken = res?.access_token ?? res?.token;
+        if (authToken) {
+          const remember = this.form.controls.remember.value;
+          this.authService.setAuthToken(authToken, remember);
+
+          // Définir l'utilisateur depuis la réponse
+          if (res.user) {
+            this.authService.setCurrentUser({
+              id: String(res.user.id),
+              login: res.user.login,
+              email: res.user.email,
+              roles: [String(res.user.role ?? res.user.profil ?? 'Utilisateur')],
+              name: [res.user.prenom, res.user.nom].filter(Boolean).join(' ').trim() || undefined,
+            });
+          }
+
+          // Charger les menus et capabilities
+          this.authService.fetchMe().subscribe({
+            next: (me) => {
+              if (Array.isArray(me?.menus)) {
+                const mapped = this.authService.mapApiMenusToMenuItems(me.menus);
+                this.authService.setMenus(mapped);
+              }
+
+              if (me?.capabilities) {
+                const remember = this.form.controls.remember.value;
+                this.authService.setCapabilities(me.capabilities, remember);
+              }
+
+              this.isGoogleLoading.set(false);
+              this.router.navigate(['/dashboard']);
+            },
+            error: (err) => {
+              console.warn('LoginPage: Erreur lors du chargement des menus après Google login:', err);
+              this.isGoogleLoading.set(false);
+              this.router.navigate(['/dashboard']);
+            },
+          });
+        } else {
+          this.isGoogleLoading.set(false);
+          this.apiError.set('Erreur: Aucun token reçu du serveur.');
+        }
+      },
+      error: (err: HttpErrorResponse) => {
+        this.isGoogleLoading.set(false);
+
+        if (err.status === 0) {
+          this.apiError.set(
+            "Impossible de contacter l'API (serveur indisponible ou CORS). Vérifiez Symfony sur http://localhost:8000"
+          );
+          return;
+        }
+
+        const body: any = err.error;
+        if (body?.message) {
+          this.apiError.set(body.message);
+        } else if (err.status === 401) {
+          this.apiError.set('Utilisateur non trouvé ou non autorisé.');
+        } else {
+          this.apiError.set(`Erreur de connexion Google (HTTP ${err.status}). Veuillez réessayer.`);
+        }
+      },
+    });
   }
 
   protected verify2FA(): void {

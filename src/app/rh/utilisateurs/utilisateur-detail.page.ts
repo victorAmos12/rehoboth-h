@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { UtilisateursService, UtilisateurDetail } from './services/utilisateurs.service';
 import { ToastService } from '../../services/toast.service';
 import { ModalService } from '../../services/modal.service';
@@ -8,7 +8,7 @@ import { ModalService } from '../../services/modal.service';
 @Component({
   selector: 'app-utilisateur-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './utilisateur-detail.page.html',
 })
 export class UtilisateurDetailPage implements OnInit {

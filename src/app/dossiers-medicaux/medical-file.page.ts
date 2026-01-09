@@ -1,6 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MedicalFileService, MedicalFile, FamilyHistory, Vaccination, CriticalInfo } from '../dossiers-medicaux/services/medical-file.service';
 import { PatientService, Patient } from '../services/patient.service';
@@ -10,7 +10,7 @@ import { ToastService } from '../services/toast.service';
 @Component({
   selector: 'app-medical-file',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './medical-file.page.html',
   styleUrls: ['./medical-file.page.css'],
 })
