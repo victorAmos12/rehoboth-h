@@ -112,7 +112,12 @@ export class LayoutPage implements OnInit {
 
   protected logout(): void {
     this.authService.logout();
-    window.location.href = '/login';
+    // Naviguer vers login (le composant LoginPage forcera le dark mode)
+    console.log('[Layout-Logout] Redirection vers /login');
+    // Utiliser window.location.href pour forcer un hard refresh complet
+    setTimeout(() => {
+      window.location.href = '/login';
+    }, 50);
   }
 
   protected toggleSidebar(): void {
@@ -137,6 +142,9 @@ export class LayoutPage implements OnInit {
       this.darkMode.set(isDark);
       if (isDark) {
         document.documentElement.classList.add('dark');
+      } else {
+        // Important: supprimer la classe dark en light mode
+        document.documentElement.classList.remove('dark');
       }
     }
   }

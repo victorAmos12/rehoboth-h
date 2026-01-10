@@ -59,6 +59,9 @@ export class LoginPage implements OnInit, OnDestroy {
   protected readonly isGoogleLoading = signal(false);
   protected readonly googleClientId = signal<string>('');
 
+  // Sauvegarder le mode précédent pour le restaurer quand on quitte la page login
+  private previousDarkModeState: boolean | null = null;
+
   protected readonly form = new FormGroup({
     login: new FormControl('', {
       nonNullable: true,
@@ -85,12 +88,57 @@ export class LoginPage implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Forcer le dark mode sur la page de login
+    this.forceDarkModeOnLogin();
+    
     // Initialiser le bouton Google une seule fois au démarrage du composant
     this.initializeGoogleButton();
   }
 
   ngOnDestroy(): void {
-    // Cleanup si nécessaire
+    // Restaurer le mode précédent quand on quitte la page login
+    this.restorePreviousDarkMode();
+  }
+
+  /**
+   * Force le dark mode sur la page de login
+   */
+  private forceDarkModeOnLogin(): void {
+    const htmlElement = document.documentElement;
+    
+    // Sauvegarder l'état actuel
+    const currentState = localStorage.getItem('darkMode');
+    this.previousDarkModeState = currentState === 'true';
+    
+    console.log('[LoginPage] Sauvegardé l\'état du dark mode:', this.previousDarkModeState);
+    
+    // Forcer le dark mode immédiatement
+    htmlElement.classList.add('dark');
+    console.log('[LoginPage] Dark mode forcé sur la page login (immediate)');
+    
+    // Réappliquer après que app.ts ait fini (app.ts utilise 100ms)
+    setTimeout(() => {
+      htmlElement.classList.add('dark');
+      console.log('[LoginPage] Dark mode ré-appliqué après app.ts');
+    }, 150);
+  }
+
+  /**
+   * Restaure le mode précédent quand on quitte la page login
+   */
+  private restorePreviousDarkMode(): void {
+    const htmlElement = document.documentElement;
+    
+    if (this.previousDarkModeState === true) {
+      console.log('[LoginPage] Restauration du dark mode');
+      htmlElement.classList.add('dark');
+    } else if (this.previousDarkModeState === false) {
+      console.log('[LoginPage] Restauration du light mode');
+      htmlElement.classList.remove('dark');
+    } else {
+      console.log('[LoginPage] Pas de mode précédent, nettoyage');
+      htmlElement.classList.remove('dark');
+    }
   }
 
   /**

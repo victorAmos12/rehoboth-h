@@ -15,6 +15,62 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Script pour appliquer le dark mode immédiatement avant le chargement d'Angular -->
+  <script>
+    (function() {
+      function applyDarkMode() {
+        const htmlElement = document.documentElement;
+        // Toujours commencer par supprimer la classe dark
+        htmlElement.classList.remove('dark');
+        
+        const saved = localStorage.getItem('darkMode');
+        console.log('[index.html] darkMode from localStorage:', saved);
+        
+        if (saved === 'true') {
+          console.log('[index.html] Applying dark mode');
+          htmlElement.classList.add('dark');
+        } else if (saved === 'false') {
+          console.log('[index.html] Light mode (no dark class)');
+          // Garder la classe dark supprimée
+        } else {
+          // Si aucune préférence sauvegardée, utiliser la préférence système
+          if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            console.log('[index.html] System prefers dark mode');
+            htmlElement.classList.add('dark');
+            localStorage.setItem('darkMode', 'true');
+          } else {
+            console.log('[index.html] System prefers light mode');
+            localStorage.setItem('darkMode', 'false');
+          }
+        }
+        
+        console.log('[index.html] Final HTML classes:', htmlElement.className);
+      }
+      
+      // Appliquer immédiatement au chargement du document
+      applyDarkMode();
+      
+      // Réappliquer après un court délai pour s'assurer que c'est bien appliqué
+      setTimeout(applyDarkMode, 0);
+      
+      // Réappliquer après le chargement complet du document
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', applyDarkMode);
+      }
+      
+      // Observer les changements de classe pour déboguer
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.attributeName === 'class') {
+            console.log('[index.html] HTML class changed to:', document.documentElement.className);
+          }
+        });
+      });
+      
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    })();
+  </script>
 </head>
 <body class="font-inter">
   <app-root></app-root>

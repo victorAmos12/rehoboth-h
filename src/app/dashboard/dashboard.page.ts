@@ -19,7 +19,9 @@ export class DashboardPage implements OnInit {
   constructor(
     private readonly authService: AuthService,
     private readonly router: Router
-  ) {}
+  ) {
+    this.loadDarkModePreference();
+  }
 
   ngOnInit(): void {
     console.log('DashboardPage: Initialisation');
@@ -85,8 +87,13 @@ export class DashboardPage implements OnInit {
 
   protected logout(): void {
     this.authService.logout();
-    // Redirection immédiate après déconnexion
-    this.router.navigate(['/login']);
+    // Sauvegarder la préférence et naviguer vers login (le composant LoginPage forcera le dark mode)
+    this.saveDarkModePreference();
+    console.log('[Dashboard-Logout] Redirection vers /login');
+    // Utiliser window.location.href pour forcer un hard refresh complet
+    setTimeout(() => {
+      window.location.href = '/login';
+    }, 50);
   }
 
   protected toggleSidebar(): void {
@@ -95,11 +102,30 @@ export class DashboardPage implements OnInit {
 
   protected toggleDarkMode(): void {
     this.darkMode.set(!this.darkMode());
+    this.saveDarkModePreference();
     // Appliquer la classe au document pour les styles globaux
     if (this.darkMode()) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
+  }
+
+  private loadDarkModePreference(): void {
+    const saved = localStorage.getItem('darkMode');
+    if (saved !== null) {
+      const isDark = saved === 'true';
+      this.darkMode.set(isDark);
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        // Important: supprimer la classe dark en light mode
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  }
+
+  private saveDarkModePreference(): void {
+    localStorage.setItem('darkMode', this.darkMode().toString());
   }
 }
