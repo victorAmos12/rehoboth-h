@@ -1,0 +1,180 @@
+<div class="min-h-screen bg-slate-50 dark:bg-slate-900 p-8">
+  <div class="max-w-2xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+        {{ isEditMode() ? 'Modifier le Lit' : 'Nouveau Lit' }}
+      </h1>
+      <p class="text-slate-600 dark:text-slate-400">
+        {{ isEditMode() ? 'Modifiez les informations du lit' : 'Créez un nouveau lit hospitalier' }}
+      </p>
+    </div>
+
+    <!-- Error Message -->
+    @if (error()) {
+      <div class="mb-6 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 flex items-center gap-3">
+        <i class="fas fa-exclamation-circle text-red-500 dark:text-red-400"></i>
+        <span class="text-red-700 dark:text-red-300">{{ error() }}</span>
+      </div>
+    }
+
+    <!-- Loading State -->
+    @if (loading()) {
+      <div class="flex flex-col items-center justify-center py-12 gap-4">
+        <i class="fas fa-spinner animate-spin text-2xl text-slate-400"></i>
+        <p class="text-slate-600 dark:text-slate-400">Chargement...</p>
+      </div>
+    } @else {
+      <!-- Form -->
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-6 space-y-6">
+        <!-- Service (automatique depuis la chambre sélectionnée) -->
+        <div>
+          <p class="text-sm text-slate-600 mb-2">Service et étage sont récupérés automatiquement depuis la chambre sélectionnée.</p>
+          @if (chambreSelectionnee()) {
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-semibold mb-1" style="color: var(--color-text-primary);">Service</label>
+                <p class="px-3 py-2 rounded-lg" style="background-color: var(--color-bg-surface);">{{ getServiceNameForChambre() }}</p>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold mb-1" style="color: var(--color-text-primary);">Étage</label>
+                <p class="px-3 py-2 rounded-lg" style="background-color: var(--color-bg-surface);">{{ getChambreEtageDisplay() }}</p>
+              </div>
+            </div>
+          } @else {
+            <p class="text-sm text-slate-500">Choisissez une chambre pour remplir automatiquement le service et l'étage.</p>
+          }
+        </div>
+
+        <!-- Chambre -->
+        <div>
+          <label class="block text-sm font-semibold mb-2" style="color: var(--color-text-primary);">
+            Chambre <span style="color: var(--color-error);">*</span>
+          </label>
+          <select
+            formControlName="chambre_id"
+            class="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
+            style="background-color: var(--color-bg-surface); color: var(--color-text-primary); border: 1px solid var(--color-border-default);"
+          >
+            <option value="">Sélectionner une chambre</option>
+            @for (chambre of chambres(); track chambre.id) {
+              <option [value]="chambre.id">{{ chambre.numero_chambre }} - {{ chambre.type_chambre }} ({{ chambre.nombre_lits }} lits)</option>
+            }
+          </select>
+          @if (form.get('chambre_id')?.invalid && form.get('chambre_id')?.touched) {
+            <p class="mt-1 text-sm" style="color: var(--color-error);">Chambre requise</p>
+          }
+
+          <!-- Affichage du seuil de lits -->
+          @if (chambreSelectionnee()) {
+            <div class="mt-4 p-4 rounded-lg" style="background-color: rgba(37, 99, 235, 0.1); border: 1px solid rgba(37, 99, 235, 0.3);">
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-sm font-semibold" style="color: var(--color-text-primary);">Capacité de la chambre</span>
+                <span class="text-sm font-bold" style="color: var(--color-primary);">
+                  {{ litsParChambre()[chambreSelectionnee()!.id!] || 0 }}/{{ chambreSelectionnee()?.nombre_lits }} lits
+                </span>
+              </div>
+              <div class="w-full h-2 rounded-full" style="background-color: rgba(107, 114, 128, 0.2);">
+                <div
+                  class="h-full rounded-full transition-all"
+                  [style.width.%]="((litsParChambre()[chambreSelectionnee()!.id!] || 0) / (chambreSelectionnee()?.nombre_lits || 1)) * 100"
+                  [style.background-color]="
+                    (litsParChambre()[chambreSelectionnee()!.id!] || 0) >= (chambreSelectionnee()?.nombre_lits || 0)
+                      ? 'var(--color-error)'
+                      : 'var(--color-primary)'
+                  "
+                ></div>
+              </div>
+              
+              @if (getLitsDisponiblesEnChambre() > 0) {
+                <p class="mt-2 text-sm" style="color: var(--color-success);">
+                  <i class="fas fa-check-circle mr-1"></i>
+                  {{ getLitsDisponiblesEnChambre() }} lit(s) disponible(s)
+                </p>
+              } @else {
+                <p class="mt-2 text-sm" style="color: var(--color-error);">
+                  <i class="fas fa-exclamation-circle mr-1"></i>
+                  Capacité maximale atteinte - Impossible d'ajouter un lit
+                </p>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Numéro Lit -->
+        <div>
+          <label class="block text-sm font-semibold mb-2" style="color: var(--color-text-primary);">
+            Numéro du Lit <span style="color: var(--color-error);">*</span>
+          </label>
+          <input
+            type="text"
+            formControlName="numero_lit"
+            placeholder="ex: A101"
+            class="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
+            style="background-color: var(--color-bg-surface); color: var(--color-text-primary); border: 1px solid var(--color-border-default);"
+          />
+          @if (form.get('numero_lit')?.invalid && form.get('numero_lit')?.touched) {
+            <p class="mt-1 text-sm" style="color: var(--color-error);">Numéro requis (min 2 caractères)</p>
+          }
+        </div>
+
+        <!-- Type Lit -->
+        <div>
+          <label class="block text-sm font-semibold mb-2" style="color: var(--color-text-primary);">Type de Lit</label>
+          <select
+            formControlName="type_lit"
+            class="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
+            style="background-color: var(--color-bg-surface); color: var(--color-text-primary); border: 1px solid var(--color-border-default);"
+          >
+            <option value="">Sélectionner un type</option>
+            <option value="Standard">Standard</option>
+            <option value="Deluxe">Deluxe</option>
+            <option value="Soins Intensifs">Soins Intensifs</option>
+            <option value="Pédiatrie">Pédiatrie</option>
+          </select>
+        </div>
+
+        <!-- Étage (déduit depuis la chambre sélectionnée) -->
+
+        <!-- Statut -->
+        <div>
+          <label class="block text-sm font-semibold mb-2" style="color: var(--color-text-primary);">Statut</label>
+          <select
+            formControlName="statut"
+            class="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
+            style="background-color: var(--color-bg-surface); color: var(--color-text-primary); border: 1px solid var(--color-border-default);"
+          >
+            <option value="disponible">Disponible</option>
+            <option value="occupe">Occupé</option>
+            <option value="maintenance">Maintenance</option>
+          </select>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex gap-3 pt-6 border-t border-slate-200 dark:border-slate-700">
+          <button
+            type="submit"
+            [disabled]="loading() || (!isEditMode() && !canAddMoreLits())"
+            class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+            [title]="!canAddMoreLits() && !isEditMode() ? 'La chambre sélectionnée a atteint sa capacité maximale' : ''"
+          >
+            @if (loading()) {
+              <i class="fas fa-spinner animate-spin"></i>
+              <span>Enregistrement...</span>
+            } @else {
+              <i class="fas fa-save"></i>
+              <span>{{ isEditMode() ? 'Modifier' : 'Créer' }}</span>
+            }
+          </button>
+          <button
+            type="button"
+            (click)="onCancel()"
+            class="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-lg font-medium hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"
+          >
+            Annuler
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</div>

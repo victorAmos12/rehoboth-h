@@ -149,6 +149,43 @@ export class AuthService {
     return !!this.getAuthToken();
   }
 
+  private normalizeRoute(route: string | null | undefined): string | undefined {
+    if (!route) return undefined;
+
+    // Mapper les routes du backend vers les routes du frontend
+    const routeMapping: Record<string, string> = {
+      '/api/patients': '/patients',
+      '/api/dossiers-medicaux': '/dossiers-medicaux',
+      '/api/utilisateurs': '/rh/utilisateurs',
+      '/api/roles': '/parametres/roles',
+      '/api/services': '/administration/services',
+      '/api/lits': '/administration/lits',
+      '/api/equipements': '/administration/equipements',
+      '/api/maintenances': '/administration/maintenances',
+      'patients': '/patients',
+      'dossiers-medicaux': '/dossiers-medicaux',
+      'utilisateurs': '/rh/utilisateurs',
+      'roles': '/parametres/roles',
+      'services': '/administration/services',
+      'lits': '/administration/lits',
+      'equipements': '/administration/equipements',
+      'maintenances': '/administration/maintenances',
+    };
+
+    // Chercher une correspondance exacte
+    if (routeMapping[route]) {
+      return routeMapping[route];
+    }
+
+    // Si la route commence par /, la retourner telle quelle
+    if (route.startsWith('/')) {
+      return route;
+    }
+
+    // Sinon, ajouter un / au début
+    return '/' + route;
+  }
+
   public mapApiMenuItemToMenuItem(api: ApiMenuItem): MenuItem {
     // Mapper les icones Google Material Icons vers FontAwesome
     const materialToFontAwesome: Record<string, string> = {
@@ -285,7 +322,7 @@ export class AuthService {
       id: String(api.id),
       label,
       icon,
-      path: api.route ?? undefined,
+      path: this.normalizeRoute(api.route),
       children: Array.isArray(api.children) ? api.children.map((c) => this.mapApiMenuItemToMenuItem(c)) : [],
     };
   }

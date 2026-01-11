@@ -1,0 +1,179 @@
+<div style="background-color: var(--color-bg-main); color: var(--color-text-primary);" class="min-h-screen p-8 transition-colors duration-300">
+  <div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="flex justify-between items-start mb-8">
+      <div>
+        <h1 class="text-3xl font-bold mb-2" style="color: var(--color-text-primary);">Détails de la Chambre</h1>
+        <p style="color: var(--color-text-muted);">Informations complètes et lits associés</p>
+      </div>
+      <div class="flex gap-2">
+        <button
+          (click)="onEdit()"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors"
+          style="background-color: var(--color-primary); color: white;"
+        >
+          <i class="fas fa-edit"></i>
+          <span>Modifier</span>
+        </button>
+        <button
+          (click)="onBack()"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors"
+          style="background-color: var(--color-bg-hover); color: var(--color-text-primary); border: 1px solid var(--color-border-default);"
+        >
+          <i class="fas fa-arrow-left"></i>
+          <span>Retour</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    @if (error()) {
+      <div class="mb-6 p-4 rounded-lg flex items-center gap-3" style="background-color: rgba(220, 38, 38, 0.1); border: 1px solid var(--color-error);">
+        <i class="fas fa-exclamation-circle" style="color: var(--color-error);"></i>
+        <span style="color: var(--color-error);">{{ error() }}</span>
+      </div>
+    }
+
+    <!-- Loading State -->
+    @if (loading()) {
+      <div class="flex flex-col items-center justify-center py-12 gap-4">
+        <i class="fas fa-spinner animate-spin text-2xl" style="color: var(--color-text-muted);"></i>
+        <p style="color: var(--color-text-muted);">Chargement...</p>
+      </div>
+    } @else if (chambre()) {
+      <!-- Chambre Info Card -->
+      <div class="mb-8 p-6 rounded-lg" style="background-color: var(--color-bg-surface); border: 1px solid var(--color-border-default);">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Colonne 1 -->
+          <div class="space-y-4">
+            <div>
+              <label style="color: var(--color-text-muted);" class="text-sm font-semibold">Numéro de Chambre</label>
+              <p style="color: var(--color-text-primary);" class="text-lg font-bold mt-1">{{ chambre()?.numero_chambre }}</p>
+            </div>
+            <div>
+              <label style="color: var(--color-text-muted);" class="text-sm font-semibold">Type</label>
+              <p style="color: var(--color-text-primary);" class="text-lg font-bold mt-1">{{ chambre()?.type_chambre || '-' }}</p>
+            </div>
+            <div>
+              <label style="color: var(--color-text-muted);" class="text-sm font-semibold">Étage</label>
+              <p style="color: var(--color-text-primary);" class="text-lg font-bold mt-1">{{ chambre()?.etage || '-' }}</p>
+            </div>
+            <div>
+              <label style="color: var(--color-text-muted);" class="text-sm font-semibold">Localisation</label>
+              <p style="color: var(--color-text-primary);" class="text-lg font-bold mt-1">{{ chambre()?.localisation || '-' }}</p>
+            </div>
+          </div>
+
+          <!-- Colonne 2 -->
+          <div class="space-y-4">
+            <div>
+              <label style="color: var(--color-text-muted);" class="text-sm font-semibold">Statut</label>
+              <div class="mt-1">
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold" [style]="getStatutStyle(chambre()?.statut)">
+                  {{ chambre()?.statut || 'Inconnu' }}
+                </span>
+              </div>
+            </div>
+            <div>
+              <label style="color: var(--color-text-muted);" class="text-sm font-semibold">Service</label>
+              <p style="color: var(--color-text-primary);" class="text-lg font-bold mt-1">{{ service()?.nom || '-' }}</p>
+            </div>
+            <div>
+              <label style="color: var(--color-text-muted);" class="text-sm font-semibold">Description</label>
+              <p style="color: var(--color-text-primary);" class="text-sm mt-1">{{ chambre()?.description || 'Aucune description' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lits Info Card -->
+      <div class="mb-8 p-6 rounded-lg" style="background-color: var(--color-bg-surface); border: 1px solid var(--color-border-default);">
+        <h2 class="text-xl font-bold mb-4" style="color: var(--color-text-primary);">Informations sur les Lits</h2>
+        <div class="grid grid-cols-3 gap-4">
+          <div class="p-4 rounded-lg text-center" style="background-color: rgba(37, 99, 235, 0.1);">
+            <p style="color: var(--color-text-muted);" class="text-sm mb-2">Total de Lits</p>
+            <p class="text-3xl font-bold" style="color: var(--color-primary);">{{ chambre()?.nombre_lits || 0 }}</p>
+          </div>
+          <div class="p-4 rounded-lg text-center" style="background-color: rgba(202, 138, 4, 0.1);">
+            <p style="color: var(--color-text-muted);" class="text-sm mb-2">Lits Occupés</p>
+            <p class="text-3xl font-bold" style="color: var(--color-warning);">{{ getNombreLitsOccupes() }}</p>
+          </div>
+          <div class="p-4 rounded-lg text-center" style="background-color: rgba(34, 197, 94, 0.1);">
+            <p style="color: var(--color-text-muted);" class="text-sm mb-2">Taux d'Occupation</p>
+            <p class="text-3xl font-bold" style="color: var(--color-success);">{{ getTauxOccupation() }}%</p>
+          </div>
+        </div>
+
+        <!-- Capacité Bar -->
+        <div class="mt-4">
+          <div class="flex justify-between items-center mb-2">
+            <span style="color: var(--color-text-primary);" class="text-sm font-semibold">Barre de Capacité</span>
+          </div>
+          <div class="w-full h-3 rounded-full" style="background-color: rgba(107, 114, 128, 0.2);">
+            <div
+              class="h-full rounded-full transition-all"
+              [style.width.%]="getTauxOccupation()"
+              [style.background-color]="getTauxOccupation() >= 80 ? 'var(--color-error)' : 'var(--color-primary)'"
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lits Table -->
+      <div class="p-6 rounded-lg" style="background-color: var(--color-bg-surface); border: 1px solid var(--color-border-default);">
+        <h2 class="text-xl font-bold mb-4" style="color: var(--color-text-primary);">Lits de la Chambre</h2>
+        @if (lits().length === 0) {
+          <div class="flex flex-col items-center justify-center py-8 gap-4">
+            <i class="fas fa-inbox text-3xl" style="color: var(--color-text-muted);"></i>
+            <p style="color: var(--color-text-muted);">Aucun lit dans cette chambre</p>
+          </div>
+        } @else {
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead style="background-color: var(--color-bg-hover); border-bottom: 1px solid var(--color-border-default);">
+                <tr>
+                  <th class="px-6 py-3 text-left text-sm font-semibold" style="color: var(--color-text-primary);">Numéro</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold" style="color: var(--color-text-primary);">Type</th>
+                  <th class="px-6 py-3 text-center text-sm font-semibold" style="color: var(--color-text-primary);">Étage</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold" style="color: var(--color-text-primary);">Statut</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold" style="color: var(--color-text-primary);">Patient</th>
+                  <th class="px-6 py-3 text-center text-sm font-semibold" style="color: var(--color-text-primary);">Actions</th>
+                </tr>
+              </thead>
+              <tbody style="border-top: 1px solid var(--color-border-default);">
+                @for (lit of lits(); track lit.id) {
+                  <tr class="transition-colors" style="border-bottom: 1px solid var(--color-border-default);">
+                    <td class="px-6 py-4 text-sm font-mono font-semibold" style="color: var(--color-text-primary);">{{ lit.numero_lit }}</td>
+                    <td class="px-6 py-4 text-sm" style="color: var(--color-text-secondary);">{{ lit.type_lit || '-' }}</td>
+                    <td class="px-6 py-4 text-sm text-center" style="color: var(--color-text-secondary);">{{ lit.etage || '-' }}</td>
+                    <td class="px-6 py-4 text-sm">
+                      <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold" [ngClass]="getStatutLitBadgeClass(lit.statut || (isLitOccupied(lit) ? 'occupe' : 'disponible'))">
+                        {{ lit.statut || (isLitOccupied(lit) ? 'Occupé' : 'Disponible') }}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-sm text-center" style="color: var(--color-text-secondary);">
+                      {{ getPatientDisplay(lit) }}
+                    </td>
+                    <td class="px-6 py-4 text-sm">
+                      <div class="flex justify-center gap-2">
+                        <a [routerLink]="['/administration/lits', lit.id!]" class="inline-flex items-center justify-center w-10 h-10 rounded-lg transition-colors" style="background-color: rgba(37, 99, 235, 0.1); color: var(--color-primary);" title="Voir détails">
+                          <i class="fas fa-eye"></i>
+                        </a>
+                        <button (click)="downloadTicket(lit.id!)" class="inline-flex items-center justify-center w-10 h-10 rounded-lg transition-colors" style="background-color: rgba(14, 165, 233, 0.08); color: var(--color-primary);" title="Télécharger ticket">
+                          <i class="fas fa-download"></i>
+                        </button>
+                        <button (click)="printTicket(lit.id!)" class="inline-flex items-center justify-center w-10 h-10 rounded-lg transition-colors" style="background-color: rgba(59, 130, 246, 0.08); color: var(--color-primary);" title="Imprimer ticket">
+                          <i class="fas fa-print"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

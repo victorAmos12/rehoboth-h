@@ -1,0 +1,257 @@
+<div style="background-color: var(--color-bg-main); color: var(--color-text-primary);" class="min-h-screen p-8 transition-colors duration-300">
+  <div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold mb-2" style="color: var(--color-text-primary);">
+        {{ isEditMode() ? 'Modifier le Pôle' : 'Nouveau Pôle d\'Activité' }}
+      </h1>
+      <p style="color: var(--color-text-muted);">
+        {{ isEditMode() ? 'Modifiez les informations du pôle' : 'Créez un nouveau pôle d\'activité pour regrouper les services' }}
+      </p>
+    </div>
+
+    <!-- Error Message -->
+    @if (error()) {
+      <div class="mb-6 p-4 rounded-lg flex items-center gap-3" style="background-color: rgba(220, 38, 38, 0.1); border: 1px solid var(--color-error);">
+        <i class="fas fa-exclamation-circle" style="color: var(--color-error);"></i>
+        <span style="color: var(--color-error);">{{ error() }}</span>
+      </div>
+    }
+
+    <!-- Loading State -->
+    @if (loading()) {
+      <div class="flex flex-col items-center justify-center py-12 gap-4">
+        <i class="fas fa-spinner animate-spin text-2xl" style="color: var(--color-text-muted);"></i>
+        <p style="color: var(--color-text-muted);">Chargement...</p>
+      </div>
+    } @else {
+      <!-- Form -->
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="rounded-lg" style="background-color: var(--color-bg-surface); border: 1px solid var(--color-border-default);">
+        <!-- Section 1: Informations Générales -->
+        <div class="p-6 border-b" style="border-color: var(--color-border-default);">
+          <h2 class="text-xl font-bold mb-6" style="color: var(--color-text-primary);">
+            <i class="fas fa-info-circle mr-2" style="color: var(--color-primary);"></i>
+            Informations Générales
+          </h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Code -->
+            <div>
+              <label class="block text-sm font-semibold mb-2" style="color: var(--color-text-primary);">
+                Code <span style="color: var(--color-error);">*</span>
+              </label>
+              <input
+                type="text"
+                formControlName="code"
+                placeholder="ex: POLE_CARDIO"
+                class="w-full px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 transition-colors"
+                style="background-color: var(--color-bg-main); color: var(--color-text-primary); border: 1px solid var(--color-border-default); --tw-ring-color: var(--color-primary);"
+              />
+              @if (form.get('code')?.invalid && form.get('code')?.touched) {
+                <p class="mt-1 text-sm" style="color: var(--color-error);">Code requis (min 2 caractères)</p>
+              }
+            </div>
+
+            <!-- Nom -->
+            <div>
+              <label class="block text-sm font-semibold mb-2" style="color: var(--color-text-primary);">
+                Nom <span style="color: var(--color-error);">*</span>
+              </label>
+              <input
+                type="text"
+                formControlName="nom"
+                placeholder="ex: Pôle Cardiologie"
+                class="w-full px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 transition-colors"
+                style="background-color: var(--color-bg-main); color: var(--color-text-primary); border: 1px solid var(--color-border-default); --tw-ring-color: var(--color-primary);"
+              />
+              @if (form.get('nom')?.invalid && form.get('nom')?.touched) {
+                <p class="mt-1 text-sm" style="color: var(--color-error);">Nom requis (min 3 caractères)</p>
+              }
+            </div>
+
+            <!-- Type Pôle -->
+            <div>
+              <label class="block text-sm font-semibold mb-2" style="color: var(--color-text-primary);">Type de Pôle</label>
+              <div class="flex gap-2">
+                <select
+                  formControlName="type_pole"
+                  class="flex-1 px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 transition-colors"
+                  style="background-color: var(--color-bg-main); color: var(--color-text-primary); border: 1px solid var(--color-border-default); --tw-ring-color: var(--color-primary);"
+                >
+                  <option value="">Sélectionner un type</option>
+                  @for (type of typePoles(); track type.id) {
+                    <option [value]="type.code">{{ type.nom }}</option>
+                  }
+                </select>
+                <button
+                  type="button"
+                  (click)="openTypePoleModal()"
+                  class="px-4 py-2.5 rounded-lg font-medium transition-colors"
+                  style="background-color: var(--color-primary); color: white;"
+                  title="Ajouter un type de pôle"
+                >
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Budget Annuel -->
+            <div>
+              <label class="block text-sm font-semibold mb-2" style="color: var(--color-text-primary);">Budget Annuel (€)</label>
+              <input
+                type="number"
+                formControlName="budget_annuel"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                class="w-full px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 transition-colors"
+                style="background-color: var(--color-bg-main); color: var(--color-text-primary); border: 1px solid var(--color-border-default); --tw-ring-color: var(--color-primary);"
+              />
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="mt-6">
+            <label class="block text-sm font-semibold mb-2" style="color: var(--color-text-primary);">Description</label>
+            <textarea
+              formControlName="description"
+              placeholder="Description détaillée du pôle..."
+              rows="3"
+              class="w-full px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 transition-colors"
+              style="background-color: var(--color-bg-main); color: var(--color-text-primary); border: 1px solid var(--color-border-default); --tw-ring-color: var(--color-primary);"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Section 2: Gestion Administrative -->
+        <div class="p-6 border-b" style="border-color: var(--color-border-default);">
+          <h2 class="text-xl font-bold mb-6" style="color: var(--color-text-primary);">
+            <i class="fas fa-users mr-2" style="color: var(--color-primary);"></i>
+            Gestion Administrative
+          </h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Responsable ID -->
+            <div>
+              <label class="block text-sm font-semibold mb-2" style="color: var(--color-text-primary);">ID du Responsable</label>
+              <input
+                type="number"
+                formControlName="responsable_id"
+                min="0"
+                placeholder="ID du responsable"
+                class="w-full px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 transition-colors"
+                style="background-color: var(--color-bg-main); color: var(--color-text-primary); border: 1px solid var(--color-border-default); --tw-ring-color: var(--color-primary);"
+              />
+              <p class="mt-1 text-xs" style="color: var(--color-text-muted);">Sera amélioré avec un sélecteur d'utilisateurs</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Statut -->
+        <div class="p-6 border-b" style="border-color: var(--color-border-default);">
+          <div class="flex items-center gap-3">
+            <input
+              type="checkbox"
+              id="actif"
+              formControlName="actif"
+              class="w-4 h-4 rounded cursor-pointer"
+              style="accent-color: var(--color-primary);"
+            />
+            <label for="actif" class="text-sm font-medium cursor-pointer" style="color: var(--color-text-primary);">
+              <i class="fas fa-check-circle mr-2" style="color: var(--color-primary);"></i>
+              Pôle actif
+            </label>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex gap-3 p-6" style="background-color: var(--color-bg-hover);">
+          <button
+            type="submit"
+            [disabled]="loading()"
+            class="flex-1 px-4 py-2.5 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+            style="background-color: var(--color-primary);"
+          >
+            @if (loading()) {
+              <i class="fas fa-spinner animate-spin"></i>
+              <span>Enregistrement...</span>
+            } @else {
+              <i class="fas fa-save"></i>
+              <span>{{ isEditMode() ? 'Modifier' : 'Créer' }}</span>
+            }
+          </button>
+          <button
+            type="button"
+            (click)="onCancel()"
+            class="flex-1 px-4 py-2.5 rounded-lg font-medium transition-colors"
+            style="background-color: var(--color-bg-surface); color: var(--color-text-primary); border: 1px solid var(--color-border-default);"
+          >
+            Annuler
+          </button>
+        </div>
+      </form>
+    }
+
+    <!-- Modal Créer Type de Pôle -->
+    @if (showTypePoleModal()) {
+      <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-lg max-w-md w-full" style="background-color: var(--color-bg-surface);">
+          <div class="p-6 border-b" style="border-color: var(--color-border-default);">
+            <div class="flex justify-between items-center">
+              <h2 class="text-xl font-bold" style="color: var(--color-text-primary);">Créer un Type de Pôle</h2>
+              <button (click)="closeTypePoleModal()" class="text-2xl" style="color: var(--color-text-muted);">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+          <div class="p-6 space-y-4">
+            <div>
+              <label class="block text-sm font-semibold mb-2" style="color: var(--color-text-primary);">Code</label>
+              <input
+                type="text"
+                [(ngModel)]="newTypePole().code"
+                placeholder="ex: POLE_CARDIO"
+                class="w-full px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 transition-colors"
+                style="background-color: var(--color-bg-main); color: var(--color-text-primary); border: 1px solid var(--color-border-default); --tw-ring-color: var(--color-primary);"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold mb-2" style="color: var(--color-text-primary);">Nom</label>
+              <input
+                type="text"
+                [(ngModel)]="newTypePole().nom"
+                placeholder="ex: Urgences et Soins Critiques"
+                class="w-full px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 transition-colors"
+                style="background-color: var(--color-bg-main); color: var(--color-text-primary); border: 1px solid var(--color-border-default); --tw-ring-color: var(--color-primary);"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold mb-2" style="color: var(--color-text-primary);">Description</label>
+              <textarea
+                [(ngModel)]="newTypePole().description"
+                placeholder="Description du type de pôle"
+                rows="2"
+                class="w-full px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 transition-colors"
+                style="background-color: var(--color-bg-main); color: var(--color-text-primary); border: 1px solid var(--color-border-default); --tw-ring-color: var(--color-primary);"
+              ></textarea>
+            </div>
+          </div>
+          <div class="flex gap-3 p-6 border-t" style="border-color: var(--color-border-default);">
+            <button
+              (click)="createTypePole()"
+              class="flex-1 px-4 py-2.5 text-white rounded-lg font-medium transition-colors"
+              style="background-color: var(--color-primary);"
+            >
+              <i class="fas fa-save mr-2"></i>Créer
+            </button>
+            <button
+              (click)="closeTypePoleModal()"
+              class="flex-1 px-4 py-2.5 rounded-lg font-medium transition-colors"
+              style="background-color: var(--color-bg-hover); color: var(--color-text-primary); border: 1px solid var(--color-border-default);"
+            >
+              Annuler
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

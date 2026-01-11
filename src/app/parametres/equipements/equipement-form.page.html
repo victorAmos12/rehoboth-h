@@ -1,0 +1,199 @@
+<div class="min-h-screen bg-slate-50 dark:bg-slate-900 p-8">
+  <div class="max-w-2xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+        {{ isEditMode() ? 'Modifier l\'Équipement' : 'Nouvel Équipement' }}
+      </h1>
+      <p class="text-slate-600 dark:text-slate-400">
+        {{ isEditMode() ? 'Modifiez les informations de l\'équipement' : 'Créez un nouvel équipement hospitalier' }}
+      </p>
+    </div>
+
+    <!-- Error Message -->
+    @if (error()) {
+      <div class="mb-6 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 flex items-center gap-3">
+        <i class="fas fa-exclamation-circle text-red-500 dark:text-red-400"></i>
+        <span class="text-red-700 dark:text-red-300">{{ error() }}</span>
+      </div>
+    }
+
+    <!-- Loading State -->
+    @if (loading()) {
+      <div class="flex flex-col items-center justify-center py-12 gap-4">
+        <i class="fas fa-spinner animate-spin text-2xl text-slate-400"></i>
+        <p class="text-slate-600 dark:text-slate-400">Chargement...</p>
+      </div>
+    } @else {
+      <!-- Form -->
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-6 space-y-6">
+        <!-- Code Équipement -->
+        <div>
+          <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+            Code <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            formControlName="code_equipement"
+            placeholder="ex: ECG001"
+            class="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          @if (form.get('code_equipement')?.invalid && form.get('code_equipement')?.touched) {
+            <p class="mt-1 text-sm text-red-600 dark:text-red-400">Code requis (min 2 caractères)</p>
+          }
+        </div>
+
+        <!-- Nom Équipement -->
+        <div>
+          <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+            Nom <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            formControlName="nom_equipement"
+            placeholder="ex: Électrocardiographe"
+            class="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          @if (form.get('nom_equipement')?.invalid && form.get('nom_equipement')?.touched) {
+            <p class="mt-1 text-sm text-red-600 dark:text-red-400">Nom requis (min 3 caractères)</p>
+          }
+        </div>
+
+        <!-- Type Équipement -->
+        <div>
+          <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">Type</label>
+          <input
+            type="text"
+            formControlName="type_equipement"
+            placeholder="ex: Diagnostic"
+            class="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <!-- Marque -->
+        <div>
+          <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">Marque</label>
+          <input
+            type="text"
+            formControlName="marque"
+            placeholder="ex: Philips"
+            class="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <!-- Modèle -->
+        <div>
+          <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">Modèle</label>
+          <input
+            type="text"
+            formControlName="modele"
+            placeholder="ex: XYZ-2000"
+            class="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <!-- Numéro Série -->
+        <div>
+          <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">Numéro de Série</label>
+          <input
+            type="text"
+            formControlName="numero_serie"
+            placeholder="ex: SN123456"
+            class="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <!-- Date Acquisition -->
+        <div>
+          <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">Date d'Acquisition</label>
+          <input
+            type="date"
+            formControlName="date_acquisition"
+            class="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <!-- Date Mise en Service -->
+        <div>
+          <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">Date de Mise en Service</label>
+          <input
+            type="date"
+            formControlName="date_mise_en_service"
+            class="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <!-- Prix Acquisition -->
+        <div>
+          <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">Prix d'Acquisition</label>
+          <input
+            type="number"
+            formControlName="prix_acquisition"
+            min="0"
+            step="0.01"
+            class="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <!-- Durée de Vie Utile -->
+        <div>
+          <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">Durée de Vie Utile (ans)</label>
+          <input
+            type="number"
+            formControlName="duree_vie_utile"
+            min="0"
+            class="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <!-- Statut -->
+        <div>
+          <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">Statut</label>
+          <select
+            formControlName="statut"
+            class="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="operationnel">Opérationnel</option>
+            <option value="maintenance">Maintenance</option>
+            <option value="hors-service">Hors Service</option>
+          </select>
+        </div>
+
+        <!-- Localisation -->
+        <div>
+          <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">Localisation</label>
+          <input
+            type="text"
+            formControlName="localisation"
+            placeholder="ex: Bâtiment A, Salle 101"
+            class="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex gap-3 pt-6 border-t border-slate-200 dark:border-slate-700">
+          <button
+            type="submit"
+            [disabled]="loading()"
+            class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+          >
+            @if (loading()) {
+              <i class="fas fa-spinner animate-spin"></i>
+              <span>Enregistrement...</span>
+            } @else {
+              <i class="fas fa-save"></i>
+              <span>{{ isEditMode() ? 'Modifier' : 'Créer' }}</span>
+            }
+          </button>
+          <button
+            type="button"
+            (click)="onCancel()"
+            class="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-lg font-medium hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"
+          >
+            Annuler
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</div>

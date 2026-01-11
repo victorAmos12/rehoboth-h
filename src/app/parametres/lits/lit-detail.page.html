@@ -1,0 +1,63 @@
+<div style="background-color: var(--color-bg-main); color: var(--color-text-primary);" class="min-h-screen p-8 transition-colors duration-300">
+  <div class="max-w-3xl mx-auto">
+    <div class="flex justify-between items-start mb-6">
+      <div>
+        <h1 class="text-2xl font-bold" style="color: var(--color-text-primary);">Détails du Lit</h1>
+        <p style="color: var(--color-text-muted);">Informations complètes sur le lit</p>
+      </div>
+      <div class="flex gap-2">
+        <button (click)="onBack()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors" style="background-color: var(--color-bg-hover); color: var(--color-text-primary); border: 1px solid var(--color-border-default);"><i class="fas fa-arrow-left"></i>Retour</button>
+        <button (click)="edit()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors" style="background-color: var(--color-primary); color: white;"><i class="fas fa-edit"></i>Modifier</button>
+        <button (click)="delete()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors" style="background-color: rgba(220, 38, 38, 0.1); color: var(--color-error);"><i class="fas fa-trash"></i>Supprimer</button>
+      </div>
+    </div>
+
+    @if (error()) {
+      <div class="mb-6 p-4 rounded-lg flex items-center gap-3" style="background-color: rgba(220, 38, 38, 0.1); border: 1px solid var(--color-error);">
+        <i class="fas fa-exclamation-circle" style="color: var(--color-error);"></i>
+        <span style="color: var(--color-error);">{{ error() }}</span>
+      </div>
+    }
+
+    @if (loading()) {
+      <div class="flex flex-col items-center justify-center py-12 gap-4">
+        <i class="fas fa-spinner animate-spin text-2xl" style="color: var(--color-text-muted);"></i>
+        <p style="color: var(--color-text-muted);">Chargement du lit...</p>
+      </div>
+    } @else if (lit()) {
+      <div class="p-6 rounded-lg" style="background-color: var(--color-bg-surface); border: 1px solid var(--color-border-default);">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label style="color: var(--color-text-muted);" class="text-sm font-semibold">Numéro du lit</label>
+            <p style="color: var(--color-text-primary);" class="text-lg font-bold mt-1">{{ lit()?.numero_lit }}</p>
+
+            <label style="color: var(--color-text-muted);" class="text-sm font-semibold">Type</label>
+            <p style="color: var(--color-text-primary);" class="text-base mt-1">{{ lit()?.type_lit || '-' }}</p>
+
+            <label style="color: var(--color-text-muted);" class="text-sm font-semibold">Étage</label>
+            <p style="color: var(--color-text-primary);" class="text-base mt-1">{{ lit()?.etage || '-' }}</p>
+
+            <label style="color: var(--color-text-muted);" class="text-sm font-semibold">Statut</label>
+            <p style="color: var(--color-text-primary);" class="text-base mt-1">{{ lit()?.statut || ( (isLitOccupied(lit()!) ? 'Occupé' : 'Disponible') ) }}</p>
+          </div>
+
+          <div>
+            <label style="color: var(--color-text-muted);" class="text-sm font-semibold">Chambre</label>
+            <p style="color: var(--color-text-primary);" class="text-base mt-1">{{ lit()?.chambre_numero || ('#' + (lit()?.chambre_id || '-')) }}</p>
+
+            <label style="color: var(--color-text-muted);" class="text-sm font-semibold">Service</label>
+            <p style="color: var(--color-text-primary);" class="text-base mt-1">{{ lit()?.service_id || '-' }}</p>
+
+            <label style="color: var(--color-text-muted);" class="text-sm font-semibold">Patient</label>
+            <p style="color: var(--color-text-primary);" class="text-base mt-1">{{ patient() ? (patient()?.nom || ('#' + (patient()?.id || '-'))) : 'Aucun patient' }}</p>
+          </div>
+        </div>
+
+        <div class="mt-6 flex gap-3">
+          <button (click)="downloadTicket()" class="px-4 py-2 rounded bg-indigo-600 text-white">Télécharger Ticket</button>
+          <button (click)="printTicket()" class="px-4 py-2 rounded bg-blue-600 text-white">Imprimer Ticket</button>
+        </div>
+      </div>
+    }
+  </div>
+</div>

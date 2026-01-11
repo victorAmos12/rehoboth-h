@@ -21,54 +21,40 @@
     (function() {
       function applyDarkMode() {
         const htmlElement = document.documentElement;
-        // Toujours commencer par supprimer la classe dark
+        const saved = localStorage.getItem('darkMode');
+        
+        // Supprimer la classe dark d'abord
         htmlElement.classList.remove('dark');
         
-        const saved = localStorage.getItem('darkMode');
-        console.log('[index.html] darkMode from localStorage:', saved);
+        // Déterminer si le dark mode doit être activé
+        let shouldBeDark = false;
         
         if (saved === 'true') {
-          console.log('[index.html] Applying dark mode');
-          htmlElement.classList.add('dark');
+          shouldBeDark = true;
         } else if (saved === 'false') {
-          console.log('[index.html] Light mode (no dark class)');
-          // Garder la classe dark supprimée
+          shouldBeDark = false;
         } else {
           // Si aucune préférence sauvegardée, utiliser la préférence système
-          if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            console.log('[index.html] System prefers dark mode');
-            htmlElement.classList.add('dark');
-            localStorage.setItem('darkMode', 'true');
-          } else {
-            console.log('[index.html] System prefers light mode');
-            localStorage.setItem('darkMode', 'false');
-          }
+          shouldBeDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          localStorage.setItem('darkMode', shouldBeDark ? 'true' : 'false');
         }
         
-        console.log('[index.html] Final HTML classes:', htmlElement.className);
+        // Appliquer la classe dark si nécessaire
+        if (shouldBeDark) {
+          htmlElement.classList.add('dark');
+        }
       }
       
       // Appliquer immédiatement au chargement du document
       applyDarkMode();
       
-      // Réappliquer après un court délai pour s'assurer que c'est bien appliqué
+      // Réappliquer après un court délai
       setTimeout(applyDarkMode, 0);
       
       // Réappliquer après le chargement complet du document
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', applyDarkMode);
       }
-      
-      // Observer les changements de classe pour déboguer
-      const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.attributeName === 'class') {
-            console.log('[index.html] HTML class changed to:', document.documentElement.className);
-          }
-        });
-      });
-      
-      observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
     })();
   </script>
 </head>

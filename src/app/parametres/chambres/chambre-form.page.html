@@ -1,0 +1,183 @@
+<div style="background-color: var(--color-bg-main); color: var(--color-text-primary);" class="min-h-screen p-8 transition-colors duration-300">
+  <div class="max-w-2xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex justify-between items-start mb-4">
+        <div>
+          <h1 class="text-3xl font-bold mb-2" style="color: var(--color-text-primary);">
+            {{ isEditMode() ? 'Modifier la Chambre' : 'Nouvelle Chambre' }}
+          </h1>
+          <p style="color: var(--color-text-muted);">
+            {{ isEditMode() ? 'Modifiez les informations de la chambre' : 'Créez une nouvelle chambre hospitalière' }}
+          </p>
+        </div>
+        <a routerLink="/administration/lits" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors" style="background-color: var(--color-bg-hover); color: var(--color-text-primary); border: 1px solid var(--color-border-default);">
+          <i class="fas fa-bed"></i>
+          <span>Gestion des Lits</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    @if (error()) {
+      <div class="mb-6 p-4 rounded-lg flex items-center gap-3" style="background-color: rgba(220, 38, 38, 0.1); border: 1px solid var(--color-error);">
+        <i class="fas fa-exclamation-circle" style="color: var(--color-error);"></i>
+        <span style="color: var(--color-error);">{{ error() }}</span>
+      </div>
+    }
+
+    <!-- Loading State -->
+    @if (loading()) {
+      <div class="flex flex-col items-center justify-center py-12 gap-4">
+        <i class="fas fa-spinner animate-spin text-2xl" style="color: var(--color-text-muted);"></i>
+        <p style="color: var(--color-text-muted);">Chargement...</p>
+      </div>
+    } @else {
+      <!-- Form -->
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="rounded-lg p-6 space-y-6" style="background-color: var(--color-bg-surface); border: 1px solid var(--color-border-default);">
+        <!-- Service -->
+        <div>
+          <label class="block text-sm font-semibold mb-2" style="color: var(--color-text-primary);">
+            Service <span style="color: var(--color-error);">*</span>
+          </label>
+          <select
+            formControlName="service_id"
+            class="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
+            style="background-color: var(--color-bg-surface); color: var(--color-text-primary); border: 1px solid var(--color-border-default);"
+          >
+            <option value="">Sélectionner un service</option>
+            @for (service of services(); track service.id) {
+              <option [value]="service.id">{{ service.nom }} ({{ service.code }})</option>
+            }
+          </select>
+          @if (form.get('service_id')?.invalid && form.get('service_id')?.touched) {
+            <p class="mt-1 text-sm" style="color: var(--color-error);">Service requis</p>
+          }
+        </div>
+
+        <!-- Numéro Chambre -->
+        <div>
+          <label class="block text-sm font-semibold mb-2" style="color: var(--color-text-primary);">
+            Numéro de Chambre <span style="color: var(--color-error);">*</span>
+          </label>
+          <input
+            type="text"
+            formControlName="numero_chambre"
+            placeholder="ex: 101"
+            class="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
+            style="background-color: var(--color-bg-surface); color: var(--color-text-primary); border: 1px solid var(--color-border-default);"
+          />
+          @if (form.get('numero_chambre')?.invalid && form.get('numero_chambre')?.touched) {
+            <p class="mt-1 text-sm" style="color: var(--color-error);">Numéro requis</p>
+          }
+        </div>
+
+        <!-- Type Chambre -->
+        <div>
+          <label class="block text-sm font-semibold mb-2" style="color: var(--color-text-primary);">Type de Chambre</label>
+          <select
+            formControlName="type_chambre"
+            class="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
+            style="background-color: var(--color-bg-surface); color: var(--color-text-primary); border: 1px solid var(--color-border-default);"
+          >
+            <option value="">Sélectionner un type</option>
+            <option value="Simple">Simple</option>
+            <option value="Double">Double</option>
+            <option value="Triple">Triple</option>
+            <option value="Suite">Suite</option>
+          </select>
+        </div>
+
+        <!-- Nombre de Lits -->
+        <div>
+          <label class="block text-sm font-semibold mb-2" style="color: var(--color-text-primary);">Nombre de Lits</label>
+          <input
+            type="number"
+            formControlName="nombre_lits"
+            min="1"
+            class="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
+            style="background-color: var(--color-bg-surface); color: var(--color-text-primary); border: 1px solid var(--color-border-default);"
+          />
+        </div>
+
+        <!-- Étage -->
+        <div>
+          <label class="block text-sm font-semibold mb-2" style="color: var(--color-text-primary);">Étage</label>
+          <input
+            type="number"
+            formControlName="etage"
+            min="0"
+            class="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
+            style="background-color: var(--color-bg-surface); color: var(--color-text-primary); border: 1px solid var(--color-border-default);"
+          />
+        </div>
+
+        <!-- Localisation -->
+        <div>
+          <label class="block text-sm font-semibold mb-2" style="color: var(--color-text-primary);">Localisation</label>
+          <input
+            type="text"
+            formControlName="localisation"
+            placeholder="ex: Aile A"
+            class="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
+            style="background-color: var(--color-bg-surface); color: var(--color-text-primary); border: 1px solid var(--color-border-default);"
+          />
+        </div>
+
+        <!-- Statut -->
+        <div>
+          <label class="block text-sm font-semibold mb-2" style="color: var(--color-text-primary);">Statut</label>
+          <select
+            formControlName="statut"
+            class="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
+            style="background-color: var(--color-bg-surface); color: var(--color-text-primary); border: 1px solid var(--color-border-default);"
+          >
+            <option value="disponible">Disponible</option>
+            <option value="occupée">Occupée</option>
+            <option value="maintenance">Maintenance</option>
+            <option value="réservée">Réservée</option>
+            <option value="hors_service">Hors Service</option>
+          </select>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block text-sm font-semibold mb-2" style="color: var(--color-text-primary);">Description</label>
+          <textarea
+            formControlName="description"
+            placeholder="Description de la chambre..."
+            rows="3"
+            class="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2"
+            style="background-color: var(--color-bg-surface); color: var(--color-text-primary); border: 1px solid var(--color-border-default);"
+          ></textarea>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex gap-3 pt-6" style="border-top: 1px solid var(--color-border-default);">
+          <button
+            type="submit"
+            [disabled]="loading()"
+            class="flex-1 px-4 py-2 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+            style="background-color: var(--color-primary);"
+          >
+            @if (loading()) {
+              <i class="fas fa-spinner animate-spin"></i>
+              <span>Enregistrement...</span>
+            } @else {
+              <i class="fas fa-save"></i>
+              <span>{{ isEditMode() ? 'Modifier' : 'Créer' }}</span>
+            }
+          </button>
+          <button
+            type="button"
+            (click)="onCancel()"
+            class="flex-1 px-4 py-2 rounded-lg font-medium transition-colors"
+            style="background-color: var(--color-bg-hover); color: var(--color-text-primary); border: 1px solid var(--color-border-default);"
+          >
+            Annuler
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</div>

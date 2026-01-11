@@ -1,0 +1,25 @@
+@import '../services/services-list.page.css';
+
+.badge-success {
+  background-color: rgba(22, 163, 74, 0.1);
+  color: #16A34A;
+}
+
+.badge-warning {
+  background-color: rgba(202, 138, 4, 0.1);
+  color: #CA8A04;
+}
+
+.badge-danger {
+  background-color: rgba(220, 38, 38, 0.1);
+  color: #DC2626;
+}
+
+.badge-default {
+  background-color: rgba(107, 114, 128, 0.1);
+  color: #6B7280;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
