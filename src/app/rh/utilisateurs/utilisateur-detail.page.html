@@ -39,13 +39,26 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
       <!-- Identité Section -->
       <div class="lg:col-span-2 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] p-5">
-        <div class="flex items-start justify-between">
-          <div>
-            <div class="text-lg font-semibold text-[var(--color-text-primary)]">{{ user()!.identite.prenom }} {{ user()!.identite.nom }}</div>
-            <div class="text-sm text-[var(--color-text-muted)]">{{ user()!.identite.email }} • {{ user()!.identite.login }}</div>
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex items-start gap-4 flex-1">
+            @if (user()!.informations_professionnelles.photo_profil) {
+              <img
+                [src]="user()!.informations_professionnelles.photo_profil"
+                alt="Photo de profil"
+                class="w-24 h-24 rounded-lg object-cover border-2 border-[var(--color-border-default)] flex-shrink-0"
+              />
+            } @else {
+              <div class="w-24 h-24 rounded-lg bg-[var(--color-bg-hover)] border-2 border-dashed border-[var(--color-border-default)] flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-user text-2xl text-[var(--color-text-muted)]"></i>
+              </div>
+            }
+            <div>
+              <div class="text-lg font-semibold text-[var(--color-text-primary)]">{{ user()!.identite.prenom }} {{ user()!.identite.nom }}</div>
+              <div class="text-sm text-[var(--color-text-muted)]">{{ user()!.identite.email }} • {{ user()!.identite.login }}</div>
+            </div>
           </div>
           <span
-            class="inline-flex items-center px-2 py-1 rounded-full text-xs"
+            class="inline-flex items-center px-2 py-1 rounded-full text-xs flex-shrink-0"
             [class.bg-green-100]="user()!.securite.actif"
             [class.text-green-700]="user()!.securite.actif"
             [class.bg-gray-100]="!user()!.securite.actif"
@@ -140,6 +153,21 @@
             <div>
               <div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Bio</div>
               <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ user()!.informations_professionnelles.bio || '-' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Informations d'urgence -->
+        <div class="mt-8 pt-6 border-t border-[var(--color-border-default)]">
+          <h3 class="text-sm font-semibold text-[var(--color-text-primary)] mb-4">Informations d'urgence</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Contact d'urgence</div>
+              <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ user()!.informations_personnelles.contact_urgence.nom || '-' }}</div>
+            </div>
+            <div>
+              <div class="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Téléphone d'urgence</div>
+              <div class="text-sm text-[var(--color-text-secondary)] mt-1">{{ user()!.informations_personnelles.contact_urgence.telephone || '-' }}</div>
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 
 export interface HopitalRef {
@@ -144,6 +145,7 @@ export interface Utilisateur {
   role: RoleRef | null;
   profil: ProfilRef | null;
   specialite: SpecialiteRef | null;
+  photo_profil: string | null;
   dateCreation?: string;
 }
 
@@ -195,24 +197,67 @@ export class UtilisateursService {
     return new HttpHeaders(headers);
   }
 
+  private buildFullUrl(path: string | null | undefined): string | null {
+    if (!path) return null;
+    // already absolute
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    // ensure leading slash
+    if (!path.startsWith('/')) path = '/' + path;
+    return `${environment.apiUrl}${path}`;
+  }
+
   list(page: number = 1, limit: number = 20): Observable<UtilisateursListResponse> {
     const params = new HttpParams().set('page', String(page)).set('limit', String(limit));
-    return this.http.get<UtilisateursListResponse>(this.apiUrl, {
-      headers: this.getHeaders(),
-      params,
-    });
+    return this.http
+      .get<UtilisateursListResponse>(this.apiUrl, {
+        headers: this.getHeaders(),
+        params,
+      })
+      .pipe(
+        map((res) => {
+          if (res && Array.isArray(res.data)) {
+            res.data = res.data.map((u: any) => ({
+              ...u,
+              photo_profil: this.buildFullUrl(u.photo_profil ?? u.photoProfil ?? null),
+            }));
+          }
+          return res;
+        })
+      );
   }
 
   get(id: number): Observable<UtilisateurResponse> {
-    return this.http.get<UtilisateurResponse>(`${this.apiUrl}/${id}`, {
-      headers: this.getHeaders(),
-    });
+    return this.http
+      .get<UtilisateurResponse>(`${this.apiUrl}/${id}`, {
+        headers: this.getHeaders(),
+      })
+      .pipe(
+        map((res) => {
+          if (res && res.data) {
+            res.data = {
+              ...res.data,
+              photo_profil: this.buildFullUrl((res.data as any).photo_profil ?? (res.data as any).photoProfil ?? null),
+            } as any;
+          }
+          return res;
+        })
+      );
   }
 
   getDetail(id: number): Observable<UtilisateurDetailResponse> {
-    return this.http.get<UtilisateurDetailResponse>(`${this.apiUrl}/${id}`, {
-      headers: this.getHeaders(),
-    });
+    return this.http
+      .get<UtilisateurDetailResponse>(`${this.apiUrl}/${id}`, {
+        headers: this.getHeaders(),
+      })
+      .pipe(
+        map((res) => {
+          if (res && res.data && (res.data as any).informations_professionnelles) {
+            const ip = (res.data as any).informations_professionnelles;
+            ip.photo_profil = this.buildFullUrl(ip.photo_profil ?? ip.photoProfil ?? null);
+          }
+          return res;
+        })
+      );
   }
 
   create(payload: any): Observable<UtilisateurResponse> {
@@ -221,9 +266,27 @@ export class UtilisateursService {
     });
   }
 
+  createWithFile(formData: FormData): Observable<UtilisateurResponse> {
+    return this.http.post<UtilisateurResponse>(this.apiUrl, formData, {
+      headers: this.getHeaders(),
+    });
+  }
+
   update(id: number, payload: any): Observable<UtilisateurResponse> {
     return this.http.put<UtilisateurResponse>(`${this.apiUrl}/${id}`, payload, {
       headers: this.getHeaders().set('Content-Type', 'application/json'),
+    });
+  }
+
+  updateWithFile(id: number, formData: FormData): Observable<UtilisateurResponse> {
+    return this.http.put<UtilisateurResponse>(`${this.apiUrl}/${id}`, formData, {
+      headers: this.getHeaders(),
+    });
+  }
+
+  updateProfileWithFile(id: number, formData: FormData): Observable<UtilisateurResponse> {
+    return this.http.put<UtilisateurResponse>(`${this.apiUrl}/${id}/profile`, formData, {
+      headers: this.getHeaders(),
     });
   }
 

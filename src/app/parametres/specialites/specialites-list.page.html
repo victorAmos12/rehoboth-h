@@ -1,0 +1,150 @@
+<div class="p-6">
+  <div class="flex items-start justify-between gap-4 mb-6">
+    <div class="flex items-center gap-3">
+      <a
+        routerLink="/rh/utilisateurs"
+        class="px-3 py-2 rounded-lg border border-[var(--color-border-default)] hover:bg-[var(--color-bg-hover)]"
+        title="Retour à la liste des utilisateurs"
+      >
+        <i class="fas fa-arrow-left"></i>
+      </a>
+      <div>
+        <h1 class="text-2xl font-semibold text-[var(--color-text-primary)]">Spécialités</h1>
+        <p class="text-sm text-[var(--color-text-muted)]">Administration / Spécialités</p>
+      </div>
+    </div>
+
+    <a
+      routerLink="/administration/specialites/create"
+      class="px-4 py-2 rounded-lg bg-[var(--color-primary)] text-white hover:opacity-90 transition"
+    >
+      Nouvelle spécialité
+    </a>
+  </div>
+
+  <div class="rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] p-4 mb-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div class="md:col-span-2">
+        <label class="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Recherche</label>
+        <input
+          class="w-full px-3 py-2 rounded-lg border border-[var(--color-border-default)] bg-transparent"
+          [(ngModel)]="q"
+          (ngModelChange)="onSearchChange()"
+          placeholder="Nom ou code…"
+        />
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Statut</label>
+        <select
+          class="w-full px-3 py-2 rounded-lg border border-[var(--color-border-default)] bg-transparent"
+          [(ngModel)]="actif"
+          (ngModelChange)="load()"
+        >
+          <option [ngValue]="''">Tous</option>
+          <option [ngValue]="true">Actifs</option>
+          <option [ngValue]="false">Inactifs</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="mb-4 p-3 rounded-lg bg-red-50 text-red-700 border border-red-200">{{ error() }}</div>
+  }
+
+  @if (loading()) {
+    <div class="flex flex-col items-center justify-center py-12 gap-4">
+      <i class="fas fa-spinner animate-spin text-2xl" style="color: var(--color-text-muted);"></i>
+      <p style="color: var(--color-text-muted);">Chargement des spécialités...</p>
+    </div>
+  } @else {
+    <div class="overflow-x-auto rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-surface)]">
+      <table class="min-w-full">
+        <thead class="bg-[var(--color-bg-hover)]">
+          <tr>
+            <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Nom</th>
+            <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Code</th>
+            <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Description</th>
+            <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Statut</th>
+            <th class="text-right text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (s of specialites(); track s.id) {
+            <tr class="border-t border-[var(--color-border-default)] hover:bg-[var(--color-bg-hover)]">
+              <td class="px-4 py-3">
+                <div class="text-sm font-semibold text-[var(--color-text-primary)]">{{ s.nom }}</div>
+              </td>
+              <td class="px-4 py-3 text-sm text-[var(--color-text-secondary)]">{{ s.code }}</td>
+              <td class="px-4 py-3 text-sm text-[var(--color-text-secondary)]">{{ s.description || '-' }}</td>
+              <td class="px-4 py-3">
+                <span
+                  class="inline-flex items-center px-2 py-1 rounded-full text-xs"
+                  [class.bg-green-100]="s.actif"
+                  [class.text-green-700]="s.actif"
+                  [class.bg-gray-100]="!s.actif"
+                  [class.text-gray-700]="!s.actif"
+                >
+                  {{ s.actif ? 'Actif' : 'Inactif' }}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-right">
+                <div class="flex gap-3 justify-end">
+                  <button
+                    (click)="edit(s.id)"
+                    class="text-[var(--color-primary)] hover:opacity-70 transition"
+                    title="Modifier"
+                  >
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button
+                    (click)="delete(s.id, s.nom)"
+                    [disabled]="deleting() === s.id"
+                    class="text-red-600 hover:opacity-70 transition disabled:opacity-50"
+                    title="Supprimer"
+                  >
+                    @if (deleting() === s.id) {
+                      <i class="fas fa-spinner animate-spin"></i>
+                    } @else {
+                      <i class="fas fa-trash"></i>
+                    }
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+
+          @if (specialites().length === 0) {
+            <tr>
+              <td class="px-4 py-6 text-center text-sm text-[var(--color-text-muted)]" colspan="5">
+                Aucune spécialité
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="flex items-center justify-between mt-4 text-sm text-[var(--color-text-muted)]">
+      <div>
+        Page {{ page() }} / {{ pages() }} • Total: {{ total() }}
+      </div>
+      <div class="flex gap-2">
+        <button
+          class="px-3 py-1 rounded border border-[var(--color-border-default)] hover:bg-[var(--color-bg-hover)] disabled:opacity-50"
+          (click)="prev()"
+          [disabled]="page() <= 1"
+        >
+          Précédent
+        </button>
+        <button
+          class="px-3 py-1 rounded border border-[var(--color-border-default)] hover:bg-[var(--color-bg-hover)] disabled:opacity-50"
+          (click)="next()"
+          [disabled]="page() >= pages()"
+        >
+          Suivant
+        </button>
+      </div>
+    </div>
+  }
+</div>

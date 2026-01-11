@@ -28,6 +28,8 @@ import { EquipementsListPage } from './parametres/equipements/equipements-list.p
 import { EquipementFormPage } from './parametres/equipements/equipement-form.page';
 import { MaintenancesListPage } from './parametres/maintenances/maintenances-list.page';
 import { MaintenanceFormPage } from './parametres/maintenances/maintenance-form.page';
+import { SpecialitesListPage } from './parametres/specialites/specialites-list.page';
+import { SpecialiteFormPage } from './parametres/specialites/specialite-form.page';
 
 import { authGuard } from './guards/auth.guard';
 
@@ -58,6 +60,7 @@ export const routes: Routes = [
 
       // Ressources Humaines
       { path: 'rh/utilisateurs', component: UtilisateursListPage },
+      { path: 'rh/utilisateurs/create', component: UtilisateurFormPage },
       { path: 'rh/utilisateurs/:id', component: UtilisateurDetailPage },
       { path: 'rh/utilisateurs/:id/edit', component: UtilisateurFormPage },
       // Alias de compatibilité si l'API menu envoie /api/utilisateurs
@@ -98,6 +101,10 @@ export const routes: Routes = [
       { path: 'administration/maintenances', component: MaintenancesListPage },
       { path: 'administration/maintenances/create', component: MaintenanceFormPage },
       { path: 'administration/maintenances/:id', component: MaintenanceFormPage },
+
+      { path: 'administration/specialites', component: SpecialitesListPage },
+      { path: 'administration/specialites/create', component: SpecialiteFormPage },
+      { path: 'administration/specialites/:id/edit', component: SpecialiteFormPage },
     ],
   },
 ];

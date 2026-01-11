@@ -68,7 +68,12 @@ export class UtilisateursListPage implements OnInit {
         page,
         limit,
       };
-      if (q) payload.search = q;
+      if (q) {
+        payload.nom = q;
+        payload.prenom = q;
+        payload.email = q;
+        payload.login = q;
+      }
       if (actif !== '') payload.actif = actif;
 
       this.service.search(payload).subscribe({
