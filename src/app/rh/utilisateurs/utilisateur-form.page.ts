@@ -245,9 +245,10 @@ export class UtilisateurFormPage implements OnInit {
         return;
       }
 
-      // Vérifier la taille (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        this.toast.warning('La photo ne doit pas dépasser 5MB');
+      // Vérifier la taille (max 10MB)
+      const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
+      if (file.size > MAX_SIZE) {
+        this.toast.warning('La photo ne doit pas dépasser 10MB');
         return;
       }
 

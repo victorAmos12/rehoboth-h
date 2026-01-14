@@ -12,6 +12,7 @@ import { DossiersMedicauxCreatePage } from './dossiers-medicaux/dossiers-medicau
 import { UtilisateursListPage } from './rh/utilisateurs/utilisateurs-list.page';
 import { UtilisateurDetailPage } from './rh/utilisateurs/utilisateur-detail.page';
 import { UtilisateurFormPage } from './rh/utilisateurs/utilisateur-form.page';
+import { UtilisateurCardsPage } from './rh/utilisateurs/utilisateur-cards.page';
 import { RolesListPage } from './parametres/roles/roles-list.page';
 import { RoleDetailPage } from './parametres/roles/role-detail.page';
 import { ChambresListPage } from './parametres/chambres/chambres-list.page';
@@ -62,6 +63,7 @@ export const routes: Routes = [
       { path: 'rh/utilisateurs', component: UtilisateursListPage },
       { path: 'rh/utilisateurs/create', component: UtilisateurFormPage },
       { path: 'rh/utilisateurs/:id', component: UtilisateurDetailPage },
+      { path: 'rh/utilisateurs/:id/cartes', component: UtilisateurCardsPage },
       { path: 'rh/utilisateurs/:id/edit', component: UtilisateurFormPage },
       // Alias de compatibilité si l'API menu envoie /api/utilisateurs
       { path: 'api/utilisateurs', redirectTo: 'rh/utilisateurs', pathMatch: 'full' },

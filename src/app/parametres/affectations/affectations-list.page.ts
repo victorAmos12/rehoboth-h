@@ -2,6 +2,12 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
+
+type AffectationsOrigin =
+  | { type: 'users'; url: string }
+  | { type: 'services'; url: string }
+  | { type: 'unknown'; url: string };
 import { TypesAndAffectationsService, Affectation, AffectationDetail } from '../../services/types-and-affectations.service';
 import { ServiceService, Service } from '../../services/service.service';
 import { UtilisateursService, Utilisateur } from '../../services/utilisateurs.service';
@@ -12,6 +18,7 @@ import { UtilisateursService, Utilisateur } from '../../services/utilisateurs.se
   templateUrl: './affectations-list.page.html',
 })
 export class AffectationsListPage implements OnInit {
+  protected readonly origin = signal<AffectationsOrigin>({ type: 'unknown', url: '/dashboard' });
   protected readonly affectations = signal<AffectationDetail[]>([]);
   protected readonly affectationsWithDetails = signal<Map<number, { utilisateur?: Utilisateur; service?: Service }>>(new Map());
   protected readonly services = signal<any[]>([]);
@@ -40,12 +47,35 @@ export class AffectationsListPage implements OnInit {
     private readonly serviceService: ServiceService,
     private readonly utilisateursService: UtilisateursService,
     private readonly router: Router,
-    private readonly route: ActivatedRoute
+    private readonly route: ActivatedRoute,
+    private readonly location: Location
   ) {}
 
   ngOnInit(): void {
-    // Vérifier si un service_id est passé en paramètre
+    // Déterminer la provenance (utilisateurs / services / autre)
+    // 1) via query param explicite `from`
+    // 2) sinon fallback basé sur la présence de `service_id`
     this.route.queryParams.subscribe((params) => {
+      const from = (params['from'] ?? '').toString();
+
+      if (from === 'users') {
+        this.origin.set({ type: 'users', url: '/rh/utilisateurs' });
+      } else if (from === 'services') {
+        // Si on arrive d'un service, on veut retourner à la page de service d'origine.
+        // On utilise le referrer si disponible, sinon on tente un fallback vers la liste des services.
+        const ref = this.safeGetReferrer();
+        this.origin.set({ type: 'services', url: ref ?? '/parametres/services' });
+      } else if (params['service_id']) {
+        // Si aucun `from` mais qu'on a un service_id, c'est très probablement depuis les services.
+        const ref = this.safeGetReferrer();
+        this.origin.set({ type: 'services', url: ref ?? '/parametres/services' });
+      } else {
+        // Fallback: revenir à la page précédente (si possible) sinon dashboard
+        const ref = this.safeGetReferrer();
+        this.origin.set({ type: 'unknown', url: ref ?? '/dashboard' });
+      }
+
+      // Vérifier si un service_id est passé en paramètre
       if (params['service_id']) {
         const serviceId = parseInt(params['service_id'], 10);
         this.selectedServiceId.set(serviceId);
@@ -263,5 +293,39 @@ export class AffectationsListPage implements OnInit {
         a.poste?.toLowerCase().includes(term) ||
         a.statut?.toLowerCase().includes(term)
     );
+  }
+
+  protected goBack(): void {
+    // Comportement le plus fiable: revenir dans l'historique SPA.
+    // (C'est ce que l'utilisateur attend: retour exact à l'écran précédent.)
+    // Si ça ne change pas de route (cas rare), on fera un fallback.
+
+    const before = this.router.url;
+    this.location.back();
+
+    // Fallback: si après un tick on est toujours sur la même URL, on redirige vers l'origin calculée.
+    setTimeout(() => {
+      const after = this.router.url;
+      if (after === before) {
+        this.router.navigateByUrl(this.origin().url);
+      }
+    }, 0);
+  }
+
+  private safeGetReferrer(): string | null {
+    try {
+      const ref = document.referrer;
+      if (!ref) return null;
+
+      // Si le referrer est sur le même origin que l'app, on retourne le path+query+hash
+      const url = new URL(ref);
+      if (url.origin === window.location.origin) {
+        return url.pathname + url.search + url.hash;
+      }
+
+      return null;
+    } catch {
+      return null;
+    }
   }
 }

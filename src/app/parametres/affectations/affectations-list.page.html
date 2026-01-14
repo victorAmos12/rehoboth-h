@@ -3,7 +3,19 @@
     <!-- Header -->
     <div class="flex justify-between items-start mb-8">
       <div>
-        <h1 class="text-3xl font-bold mb-2" style="color: var(--color-text-primary);">Affectations</h1>
+        <div class="flex items-center gap-3 mb-2">
+          <button
+            (click)="goBack()"
+            class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors"
+            style="border: 1px solid var(--color-border-default); background-color: var(--color-bg-surface); color: var(--color-text-primary);"
+            title="Retour"
+          >
+            <i class="fas fa-arrow-left"></i>
+            <span>Retour</span>
+          </button>
+
+          <h1 class="text-3xl font-bold" style="color: var(--color-text-primary);">Affectations</h1>
+        </div>
         <p style="color: var(--color-text-muted);">Gestion des affectations des utilisateurs aux services</p>
       </div>
       <button (click)="openForm()" class="inline-flex items-center gap-2 px-4 py-2 text-white rounded-lg font-medium transition-colors" style="background-color: var(--color-primary);">

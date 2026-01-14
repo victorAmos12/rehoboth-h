@@ -178,6 +178,14 @@ export interface UtilisateurDetailResponse {
   error?: string;
 }
 
+export interface ApiListResponse<T> {
+  success: boolean;
+  data?: T;
+  total?: number;
+  message?: string;
+  error?: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -197,6 +205,10 @@ export class UtilisateursService {
     return new HttpHeaders(headers);
   }
 
+  private getToken(): string {
+    return localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token') || '';
+  }
+
   private buildFullUrl(path: string | null | undefined): string | null {
     if (!path) return null;
     // already absolute
@@ -204,6 +216,24 @@ export class UtilisateursService {
     // ensure leading slash
     if (!path.startsWith('/')) path = '/' + path;
     return `${environment.apiUrl}${path}`;
+  }
+
+  /**
+   * Normalize les différentes clés possibles pour la photo d'un utilisateur
+   * (top-level photo_profil/photoProfil ou sous identite/informations_professionnelles)
+   */
+  private getNormalizedPhotoUrl(u: any): string | null {
+    if (!u) return null;
+    const candidates = [
+      u.photo_profil,
+      u.photoProfil,
+      u.identite?.photoProfil,
+      u.identite?.photo_profil,
+      u.informations_professionnelles?.photo_profil,
+      u.informations_professionnelles?.photoProfil,
+    ];
+    const found = candidates.find((c) => c !== undefined && c !== null && c !== '');
+    return this.buildFullUrl(found ?? null);
   }
 
   list(page: number = 1, limit: number = 20): Observable<UtilisateursListResponse> {
@@ -218,7 +248,8 @@ export class UtilisateursService {
           if (res && Array.isArray(res.data)) {
             res.data = res.data.map((u: any) => ({
               ...u,
-              photo_profil: this.buildFullUrl(u.photo_profil ?? u.photoProfil ?? null),
+              // Normaliser la photo pour qu'elle soit disponible dans le listing
+              photo_profil: this.getNormalizedPhotoUrl(u),
             }));
           }
           return res;
@@ -236,7 +267,7 @@ export class UtilisateursService {
           if (res && res.data) {
             res.data = {
               ...res.data,
-              photo_profil: this.buildFullUrl((res.data as any).photo_profil ?? (res.data as any).photoProfil ?? null),
+              photo_profil: this.getNormalizedPhotoUrl(res.data),
             } as any;
           }
           return res;
@@ -254,6 +285,10 @@ export class UtilisateursService {
           if (res && res.data && (res.data as any).informations_professionnelles) {
             const ip = (res.data as any).informations_professionnelles;
             ip.photo_profil = this.buildFullUrl(ip.photo_profil ?? ip.photoProfil ?? null);
+          }
+          // also ensure top-level photo is normalized
+          if (res && res.data) {
+            (res.data as any).photo_profil = this.getNormalizedPhotoUrl(res.data);
           }
           return res;
         })
@@ -297,9 +332,22 @@ export class UtilisateursService {
   }
 
   search(payload: any): Observable<UtilisateursListResponse> {
-    return this.http.post<UtilisateursListResponse>(`${this.apiUrl}/search`, payload, {
-      headers: this.getHeaders().set('Content-Type', 'application/json'),
-    });
+    return this.http
+      .post<UtilisateursListResponse>(`${this.apiUrl}/search`, payload, {
+        headers: this.getHeaders().set('Content-Type', 'application/json'),
+      })
+      .pipe(
+        map((res) => {
+          if (res && Array.isArray(res.data)) {
+            res.data = res.data.map((u: any) => ({
+              ...u,
+              // Normaliser la photo pour qu'elle soit disponible dans le listing
+              photo_profil: this.getNormalizedPhotoUrl(u),
+            }));
+          }
+          return res;
+        })
+      );
   }
 
   byHopital(hopitalId: number, page: number = 1, limit: number = 20): Observable<UtilisateursListResponse> {
@@ -391,6 +439,68 @@ export class UtilisateursService {
       { pin },
       {
         headers: this.getHeaders().set('Content-Type', 'application/json'),
+      }
+    );
+  }
+
+  // ===============================
+  // Cartes de service (Badges)
+  // ===============================
+
+  getAffectedServices(userId: number): Observable<ApiListResponse<any[]>> {
+    return this.http.get<ApiListResponse<any[]>>(`${this.apiUrl}/${userId}/affected-services`, {
+      headers: this.getHeaders(),
+    });
+  }
+
+  getAccessibleServices(userId: number): Observable<ApiListResponse<any[]>> {
+    return this.http.get<ApiListResponse<any[]>>(`${this.apiUrl}/${userId}/accessible-services`, {
+      headers: this.getHeaders(),
+    });
+  }
+
+  getServiceCardPreviewUrl(userId: number, serviceId: number): string {
+    const token = this.getToken();
+    const url = `${environment.apiUrl}/api/utilisateurs/${userId}/service-cards/${serviceId}/preview`;
+    return token ? `${url}?token=${encodeURIComponent(token)}` : url;
+  }
+
+  downloadServiceCardPdf(userId: number, serviceId: number): Observable<Blob> {
+    let params = new HttpParams();
+    const token = this.getToken();
+    if (token) params = params.set('token', token);
+
+    return this.http.get(`${this.apiUrl}/${userId}/service-cards/${serviceId}/pdf`, {
+      headers: this.getHeaders().set('Accept', 'application/pdf'),
+      params,
+      responseType: 'blob',
+    });
+  }
+
+  downloadServiceCardImage(userId: number, serviceId: number, format: 'png' | 'jpg' = 'png'): Observable<Blob> {
+    let params = new HttpParams().set('format', format);
+    const token = this.getToken();
+    if (token) params = params.set('token', token);
+
+    return this.http.get(`${this.apiUrl}/${userId}/service-cards/${serviceId}/image`, {
+      headers: this.getHeaders().set('Accept', `image/${format}`),
+      params,
+      responseType: 'blob',
+    });
+  }
+
+  downloadMultipleServiceCardsPdf(userId: number, serviceIds: number[] = []): Observable<Blob> {
+    let params = new HttpParams();
+    const token = this.getToken();
+    if (token) params = params.set('token', token);
+
+    return this.http.post(
+      `${this.apiUrl}/${userId}/service-cards/pdf-multiple`,
+      { service_ids: serviceIds },
+      {
+        headers: this.getHeaders().set('Content-Type', 'application/json').set('Accept', 'application/pdf'),
+        params,
+        responseType: 'blob',
       }
     );
   }

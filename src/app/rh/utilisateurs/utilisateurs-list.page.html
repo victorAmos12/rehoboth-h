@@ -152,7 +152,15 @@
                   <a class="text-[var(--color-primary)] hover:opacity-70 transition" title="Voir les détails" [routerLink]="['/rh/utilisateurs', u.id]">
                     <i class="fas fa-eye"></i>
                   </a>
-                  <a class="text-[var(--color-primary)] hover:opacity-70 transition" title="Gérer les affectations" [routerLink]="['/administration/affectations']" [queryParams]="{ utilisateur_id: u.id }">
+                  <a class="text-[var(--color-primary)] hover:opacity-70 transition" title="Cartes de service" [routerLink]="['/rh/utilisateurs', u.id, 'cartes']">
+                    <i class="fas fa-id-card"></i>
+                  </a>
+                  <a
+                    class="text-[var(--color-primary)] hover:opacity-70 transition"
+                    title="Gérer les affectations"
+                    [routerLink]="['/administration/affectations']"
+                    [queryParams]="{ utilisateur_id: u.id, from: 'users' }"
+                  >
                     <i class="fas fa-link"></i>
                   </a>
                 </div>

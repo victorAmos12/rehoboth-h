@@ -119,7 +119,8 @@ export class ServicesListPage implements OnInit {
   protected openAffectations(serviceId: number | undefined): void {
     if (!serviceId) return;
     // Naviguer vers la page des affectations avec le service_id en paramètre
-    this.router.navigate(['/administration/affectations'], { queryParams: { service_id: serviceId } });
+    // + indiquer explicitement la provenance pour un retour fiable.
+    this.router.navigate(['/administration/affectations'], { queryParams: { service_id: serviceId, from: 'services' } });
   }
 
   protected deleteService(id: number | undefined): void {
