@@ -25,22 +25,12 @@
   }
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .fade-in {
   animation: fadeIn 0.3s ease-out;
 }
 
 .slide-in {
   animation: slideIn 0.3s ease-out;
-}
-
-.animate-spin {
-  animation: spin 1s linear infinite;
 }
 
 /* Responsive */
@@ -56,9 +46,5 @@
   :host ::ng-deep .px-6 {
     padding-left: 1rem;
     padding-right: 1rem;
-  }
-
-  :host ::ng-deep .overflow-x-auto {
-    font-size: 0.75rem;
   }
 }

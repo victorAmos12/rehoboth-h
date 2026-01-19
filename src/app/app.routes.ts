@@ -32,6 +32,8 @@ import { MaintenanceFormPage } from './parametres/maintenances/maintenance-form.
 import { SpecialitesListPage } from './parametres/specialites/specialites-list.page';
 import { SpecialiteFormPage } from './parametres/specialites/specialite-form.page';
 import { LogsAuditListPage } from './administrations/logs-audit/logs-audit-list.page';
+import { LogsStatsPage } from './administrations/logs-audit/logs-stats.page';
+import { LogsTracePage } from './administrations/logs-audit/logs-trace.page';
 import { SauvegardesListPage } from './administrations/sauvegardes/sauvegardes-list.page';
 
 import { authGuard } from './guards/auth.guard';
@@ -118,6 +120,9 @@ export const routes: Routes = [
 
       // Administration - Logs & Audits
       { path: 'administration/logs-audit', component: LogsAuditListPage },
+      { path: 'administrations/logs', component: LogsAuditListPage },
+      { path: 'administrations/logs-stats', component: LogsStatsPage },
+      { path: 'administrations/logs-trace', component: LogsTracePage },
 
       // Administration - Sauvegardes
       { path: 'administration/sauvegardes', component: SauvegardesListPage },

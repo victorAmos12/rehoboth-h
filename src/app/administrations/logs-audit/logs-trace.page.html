@@ -1,0 +1,148 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
+  <div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex items-center gap-4 mb-4">
+        <a href="/administrations/logs" class="text-blue-600 hover:text-blue-700 font-medium"><i class="fas fa-arrow-left mr-2"></i>Retour aux logs</a>
+      </div>
+      <h1 class="text-3xl font-bold text-slate-900 mb-2"><i class="fas fa-link mr-2"></i>Trace Distribuée</h1>
+      <p class="text-slate-600">Analyse complète de la trace avec tous les spans</p>
+    </div>
+
+    @if (error()) {
+      <div class="mb-6 p-4 rounded-lg bg-red-50 text-red-700 border border-red-200 text-sm">
+        ❌ {{ error() }}
+      </div>
+    }
+
+    @if (loading()) {
+      <div class="flex items-center justify-center py-12">
+        <div class="text-center">
+          <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+          <p class="text-slate-600">Chargement de la trace...</p>
+        </div>
+      </div>
+    } @else if (trace()) {
+      <!-- Trace Info -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+            <p class="text-slate-600 text-sm font-medium">Trace ID</p>
+            <p class="text-sm font-mono font-bold text-slate-900 mt-2 break-all">{{ trace()?.traceId }}</p>
+          </div>
+          <div class="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200">
+            <p class="text-slate-600 text-sm font-medium">Nombre de Spans</p>
+            <p class="text-3xl font-bold text-purple-600 mt-2">{{ trace()?.spanCount }}</p>
+          </div>
+          <div class="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200">
+            <p class="text-slate-600 text-sm font-medium">Durée Totale</p>
+            <p class="text-3xl font-bold text-green-600 mt-2">{{ trace()?.totalDuration }}ms</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Spans Timeline -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        <h2 class="text-lg font-bold text-slate-900 mb-6">📊 Timeline des Spans</h2>
+
+        <div class="space-y-4">
+          @for (span of trace()?.spans; track span.id; let i = $index) {
+            <div class="border border-slate-200 rounded-lg overflow-hidden hover:shadow-md transition">
+              <!-- Span Header -->
+              <div class="bg-slate-50 px-4 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <span class="text-lg" [innerHTML]="getNiveauIcon(span.niveau)"></span>
+                  <div>
+                    <p class="font-semibold text-slate-900">Span #{{ i + 1 }}</p>
+                    <p class="text-xs text-slate-600 font-mono">{{ span.message }}</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <p class="font-bold text-slate-900">{{ span.tempsReponseMs }}ms</p>
+                  <p class="text-xs text-slate-600">{{ calculatePercentage(span.tempsReponseMs || 0, trace()?.totalDuration || 1) | number: '1.1-1' }}%</p>
+                </div>
+              </div>
+
+              <!-- Progress Bar -->
+              <div class="px-4 py-2 bg-white">
+                <div class="w-full bg-slate-200 rounded-full h-2">
+                  <div
+                    class="h-2 rounded-full transition-all"
+                    [style.width.%]="calculatePercentage(span.tempsReponseMs || 0, trace()?.totalDuration || 1)"
+                    [class]="span.niveau === 'ERROR' ? 'bg-red-500' : span.niveau === 'WARNING' ? 'bg-yellow-500' : 'bg-blue-500'"
+                  ></div>
+                </div>
+              </div>
+
+              <!-- Span Details -->
+              <div class="px-4 py-3 bg-white border-t border-slate-100 grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                <div>
+                  <p class="text-xs text-slate-600 font-medium">Endpoint</p>
+                  <p class="font-mono text-slate-900 break-all">{{ span.endpoint || '-' }}</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-600 font-medium">Méthode</p>
+                  <p class="font-bold text-slate-900">{{ span.methodeHttp || '-' }}</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-600 font-medium">Code HTTP</p>
+                  <p class="font-bold text-slate-900">{{ span.codeHttp || '-' }}</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-600 font-medium">Niveau</p>
+                  <span
+                    class="inline-flex items-center px-2 py-1 rounded text-xs font-medium"
+                    [class]="getNiveauColor(span.niveau)"
+                  >
+                    {{ span.niveau || '-' }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Additional Info -->
+              @if (span.description || span.message) {
+                <div class="px-4 py-3 bg-slate-50 border-t border-slate-100 text-sm">
+                  @if (span.description) {
+                    <p class="text-slate-700"><strong>Description:</strong> {{ span.description }}</p>
+                  }
+                  @if (span.message) {
+                    <p class="text-slate-700 mt-1"><strong>Message:</strong> {{ span.message }}</p>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Performance Summary -->
+      <div class="mt-6 bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        <h2 class="text-lg font-bold text-slate-900 mb-4">⚡ Résumé de Performance</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <p class="text-slate-600 text-sm font-medium">Temps Moyen par Span</p>
+            <p class="text-2xl font-bold text-blue-600 mt-2">
+              {{ (trace()?.totalDuration || 0) / (trace()?.spanCount || 1) | number: '1.0-0' }}ms
+            </p>
+          </div>
+          <div class="p-4 bg-green-50 rounded-lg border border-green-200">
+            <p class="text-slate-600 text-sm font-medium">Span le Plus Rapide</p>
+            <p class="text-2xl font-bold text-green-600 mt-2">
+              {{ calculateFastestSpan() }}ms
+            </p>
+          </div>
+          <div class="p-4 bg-red-50 rounded-lg border border-red-200">
+            <p class="text-slate-600 text-sm font-medium">Span le Plus Lent</p>
+            <p class="text-2xl font-bold text-red-600 mt-2">
+              {{ calculateSlowestSpan() }}ms
+            </p>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8 text-center">
+        <p class="text-lg text-slate-600">Aucune trace trouvée</p>
+      </div>
+    }
+  </div>
+</div>

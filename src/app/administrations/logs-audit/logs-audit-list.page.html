@@ -1,310 +1,493 @@
-<div class="p-6">
-  <div class="flex items-start justify-between gap-4 mb-6">
-    <div>
-      <h1 class="text-2xl font-semibold text-[var(--color-text-primary)]">Logs & Audits</h1>
-      <p class="text-sm text-[var(--color-text-muted)]">Administration / Logs & Audits</p>
-    </div>
-  </div>
-
-  <!-- Filtres -->
-  <div class="bg-[var(--color-bg-surface)] rounded-lg shadow-sm p-4 border border-[var(--color-border-default)] mb-6">
-    <h2 class="text-sm font-semibold text-[var(--color-text-primary)] mb-4">Filtres</h2>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
-      <div>
-        <label class="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Type Log</label>
-        <select
-          [(ngModel)]="filterTypeLog"
-          class="w-full px-3 py-2 text-sm bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] rounded border border-[var(--color-border-default)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-        >
-          <option value="">Tous</option>
-          <option value="AUDIT">Audit</option>
-          <option value="TECHNIQUE">Technique</option>
-        </select>
-      </div>
-
-      <div>
-        <label class="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Action</label>
-        <select
-          [(ngModel)]="filterActionType"
-          class="w-full px-3 py-2 text-sm bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] rounded border border-[var(--color-border-default)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-        >
-          <option value="">Tous</option>
-          <option value="CREATE">Créer</option>
-          <option value="READ">Lire</option>
-          <option value="UPDATE">Modifier</option>
-          <option value="DELETE">Supprimer</option>
-          <option value="EXPORT">Exporter</option>
-          <option value="IMPORT">Importer</option>
-          <option value="LOGIN">Connexion</option>
-          <option value="LOGOUT">Déconnexion</option>
-        </select>
-      </div>
-
-      <div>
-        <label class="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Entité</label>
-        <input
-          type="text"
-          [(ngModel)]="filterEntiteType"
-          placeholder="Patient, Utilisateur..."
-          class="w-full px-3 py-2 text-sm bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] rounded border border-[var(--color-border-default)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-        />
-      </div>
-
-      <div>
-        <label class="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Date Début</label>
-        <input
-          type="date"
-          [(ngModel)]="filterDateFrom"
-          class="w-full px-3 py-2 text-sm bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] rounded border border-[var(--color-border-default)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-        />
-      </div>
-
-      <div>
-        <label class="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Date Fin</label>
-        <input
-          type="date"
-          [(ngModel)]="filterDateTo"
-          class="w-full px-3 py-2 text-sm bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] rounded border border-[var(--color-border-default)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-        />
+<div class="min-h-screen p-6" style="background-color: var(--color-bg-main)">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h1 class="text-3xl font-bold mb-2" style="color: var(--color-text-primary)"><i class="fas fa-list mr-2"></i>Logs & Audits</h1>
+          <p style="color: var(--color-text-secondary)">Gestion complète des logs techniques et audits</p>
+        </div>
+        <a routerLink="/administrations/logs-stats" class="px-4 py-2 text-white rounded-lg transition font-medium" style="background-color: var(--color-primary);">
+          <i class="fas fa-chart-bar mr-2"></i>Statistiques
+        </a>
       </div>
     </div>
 
-    <div class="flex gap-2 mt-4">
+    <!-- Page Stats -->
+    @if (pageStats()) {
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="logs-kpi-card">
+          <div>
+            <p class="logs-kpi-label">Temps Moyen</p>
+            <p class="logs-kpi-value">{{ pageStats()?.avgResponseTime }}ms</p>
+          </div>
+          <div class="logs-kpi-icon" style="color: #3498DB;"><i class="fas fa-hourglass-half"></i></div>
+        </div>
+        <div class="logs-kpi-card">
+          <div>
+            <p class="logs-kpi-label">Erreurs</p>
+            <p class="logs-kpi-value" style="color: var(--color-error);">{{ pageStats()?.errorCount }}</p>
+          </div>
+          <div class="logs-kpi-icon" style="color: var(--color-error);"><i class="fas fa-exclamation-circle"></i></div>
+        </div>
+        <div class="logs-kpi-card">
+          <div>
+            <p class="logs-kpi-label">Alertes</p>
+            <p class="logs-kpi-value" style="color: var(--color-warning);">{{ pageStats()?.alertCount }}</p>
+          </div>
+          <div class="logs-kpi-icon" style="color: var(--color-warning);"><i class="fas fa-bell"></i></div>
+        </div>
+      </div>
+    }
+
+    <!-- Filtres -->
+    <div class="logs-card mb-6">
       <button
-        (click)="applyFilters()"
-        class="px-4 py-2 text-sm rounded bg-[var(--color-primary)] text-white hover:opacity-90 transition"
+        (click)="showFilters.set(!showFilters())"
+        class="logs-filter-header w-full"
       >
-        Appliquer
+        <h2 class="logs-card-header">
+          <i class="fas fa-filter mr-2"></i>Filtres Avancés
+        </h2>
+        <i class="fas fa-chevron-down logs-filter-icon" [style.transform]="showFilters() ? 'rotate(180deg)' : 'rotate(0deg)'"></i>
       </button>
-      <button
-        (click)="resetFilters()"
-        class="px-4 py-2 text-sm rounded border border-[var(--color-border-default)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] transition"
-      >
-        Réinitialiser
-      </button>
-    </div>
-  </div>
 
-  @if (error()) {
-    <div class="mb-4 p-3 rounded-lg bg-red-50 text-red-700 border border-red-200 text-sm">{{ error() }}</div>
-  }
+      @if (showFilters()) {
+        <div class="logs-filter-section">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <div>
+          <label class="logs-label"><i class="fas fa-file-alt mr-1"></i>Type Log</label>
+          <select
+            [(ngModel)]="filterTypeLog"
+            class="logs-select"
+          >
+            <option value="">Tous</option>
+            <option value="AUDIT">Audit</option>
+            <option value="TECHNIQUE">Technique</option>
+          </select>
+        </div>
 
-  @if (loading()) {
-    <div class="text-[var(--color-text-muted)] text-sm">Chargement…</div>
-  } @else {
-    <div class="overflow-x-auto rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-surface)]">
-      <table class="min-w-full">
-        <thead class="bg-[var(--color-bg-hover)]">
-          <tr>
-            <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Date</th>
-            <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Type</th>
-            <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Action</th>
-            <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Entité</th>
-            <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Utilisateur</th>
-            <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">IP</th>
-            <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Statut</th>
-            <th class="text-right text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (log of logs(); track log.id) {
-            <tr class="border-t border-[var(--color-border-default)] hover:bg-[var(--color-bg-hover)]">
-              <td class="px-4 py-3 text-sm text-[var(--color-text-secondary)]">
-                {{ log.dateCreation ? (log.dateCreation | date: 'dd/MM/yyyy HH:mm') : '-' }}
-              </td>
-              <td class="px-4 py-3 text-sm">
-                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-[var(--color-primary-soft)] text-[var(--color-primary)]">
-                  {{ log.typeLog || '-' }}
-                </span>
-              </td>
-              <td class="px-4 py-3 text-sm">
-                <span
-                  class="inline-flex items-center px-2 py-1 rounded-full text-xs"
-                  [class]="getActionColor(log.actionType)"
-                >
-                  {{ log.actionType || '-' }}
-                </span>
-              </td>
-              <td class="px-4 py-3 text-sm text-[var(--color-text-secondary)]">{{ log.entiteType || '-' }}</td>
-              <td class="px-4 py-3 text-sm text-[var(--color-text-secondary)]">{{ getUserName(log) }}</td>
-              <td class="px-4 py-3 text-sm font-mono text-[var(--color-text-secondary)]">{{ log.adresseIp || '-' }}</td>
-              <td class="px-4 py-3 text-sm">
-                <span
-                  class="inline-flex items-center px-2 py-1 rounded-full text-xs"
-                  [class]="getStatutColor(log.statut)"
-                >
-                  {{ log.statut || '-' }}
-                </span>
-              </td>
-              <td class="px-4 py-3 text-right">
-                <button
-                  (click)="viewDetail(log)"
-                  class="text-sm text-[var(--color-primary)] hover:underline"
-                >
-                  Voir
-                </button>
-              </td>
-            </tr>
-          }
+        <div>
+          <label class="logs-label"><i class="fas fa-gears mr-1"></i>Action</label>
+          <select
+            [(ngModel)]="filterActionType"
+            class="logs-select"
+          >
+            <option value="">Tous</option>
+            <option value="CREATE"><i class="fas fa-plus-circle"></i> Créer</option>
+            <option value="READ"><i class="fas fa-eye"></i> Lire</option>
+            <option value="UPDATE"><i class="fas fa-edit"></i> Modifier</option>
+            <option value="DELETE"><i class="fas fa-trash"></i> Supprimer</option>
+            <option value="EXPORT"><i class="fas fa-download"></i> Exporter</option>
+            <option value="IMPORT"><i class="fas fa-upload"></i> Importer</option>
+            <option value="LOGIN"><i class="fas fa-sign-in-alt"></i> Connexion</option>
+            <option value="LOGOUT"><i class="fas fa-sign-out-alt"></i> Déconnexion</option>
+          </select>
+        </div>
 
-          @if (logs().length === 0) {
-            <tr>
-              <td class="px-4 py-6 text-center text-sm text-[var(--color-text-muted)]" colspan="8">
-                Aucun log
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+        <div>
+          <label class="logs-label"><i class="fas fa-layer-group mr-1"></i>Niveau</label>
+          <select
+            [(ngModel)]="filterNiveau"
+            class="logs-select"
+          >
+            <option value="">Tous</option>
+            <option value="DEBUG"><i class="fas fa-bug"></i> Debug</option>
+            <option value="INFO"><i class="fas fa-info-circle"></i> Info</option>
+            <option value="WARNING"><i class="fas fa-exclamation-triangle"></i> Warning</option>
+            <option value="ERROR"><i class="fas fa-times-circle"></i> Error</option>
+            <option value="CRITICAL"><i class="fas fa-skull-crossbones"></i> Critical</option>
+          </select>
+        </div>
 
-    <div class="flex items-center justify-between mt-4 text-sm text-[var(--color-text-muted)]">
-      <div>
-        Page {{ page() }} / {{ pages() }} • Total: {{ total() }}
+        <div>
+          <label class="logs-label"><i class="fas fa-tag mr-1"></i>Catégorie</label>
+          <select
+            [(ngModel)]="filterCategorie"
+            class="logs-select"
+          >
+            <option value="">Tous</option>
+            <option value="APPLICATION"><i class="fas fa-cube"></i> Application</option>
+            <option value="HTTP"><i class="fas fa-globe"></i> HTTP</option>
+            <option value="DATABASE"><i class="fas fa-database"></i> Database</option>
+            <option value="SECURITY"><i class="fas fa-lock"></i> Security</option>
+            <option value="PERFORMANCE"><i class="fas fa-tachometer-alt"></i> Performance</option>
+            <option value="SYSTEM"><i class="fas fa-cogs"></i> System</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="logs-label"><i class="fas fa-object-group mr-1"></i>Entité</label>
+          <input
+            type="text"
+            [(ngModel)]="filterEntiteType"
+            placeholder="Patient, Utilisateur..."
+            class="logs-input"
+          />
+        </div>
+
+        <div>
+          <label class="logs-label"><i class="fas fa-check-circle mr-1"></i>Statut</label>
+          <select
+            [(ngModel)]="filterStatut"
+            class="logs-select"
+          >
+            <option value="">Tous</option>
+            <option value="SUCCESS"><i class="fas fa-check-circle"></i> Succès</option>
+            <option value="FAILURE"><i class="fas fa-times-circle"></i> Échec</option>
+            <option value="PARTIAL"><i class="fas fa-exclamation-circle"></i> Partiel</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="logs-label"><i class="fas fa-bell mr-1"></i>Alertes</label>
+          <select
+            [(ngModel)]="filterHasAlert"
+            class="logs-select"
+          >
+            <option value="">Tous</option>
+            <option value="true"><i class="fas fa-bell"></i> Avec alertes</option>
+            <option value="false"><i class="fas fa-bell-slash"></i> Sans alertes</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="logs-label"><i class="fas fa-search mr-1"></i>Recherche</label>
+          <input
+            type="text"
+            [(ngModel)]="filterSearch"
+            placeholder="Message, endpoint..."
+            class="logs-input"
+          />
+        </div>
       </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="logs-label"><i class="fas fa-calendar mr-1"></i>Date Début</label>
+          <input
+            type="date"
+            [(ngModel)]="filterDateFrom"
+            class="logs-input"
+          />
+        </div>
+
+        <div>
+          <label class="logs-label"><i class="fas fa-calendar mr-1"></i>Date Fin</label>
+          <input
+            type="date"
+            [(ngModel)]="filterDateTo"
+            class="logs-input"
+          />
+        </div>
+      </div>
+
       <div class="flex gap-2">
         <button
-          class="px-3 py-1 rounded border border-[var(--color-border-default)] hover:bg-[var(--color-bg-hover)] disabled:opacity-50 text-sm"
-          (click)="prev()"
-          [disabled]="page() <= 1"
+          (click)="applyFilters()"
+          class="logs-button logs-button-primary"
         >
-          Précédent
+          <i class="fas fa-check mr-1"></i>Appliquer
         </button>
         <button
-          class="px-3 py-1 rounded border border-[var(--color-border-default)] hover:bg-[var(--color-bg-hover)] disabled:opacity-50 text-sm"
-          (click)="next()"
-          [disabled]="page() >= pages()"
+          (click)="resetFilters()"
+          class="logs-button logs-button-secondary"
         >
-          Suivant
+          <i class="fas fa-rotate-left mr-1"></i>Réinitialiser
         </button>
       </div>
+        </div>
+      }
     </div>
-  }
 
-  <!-- Modal Détail -->
-  @if (showDetail() && selectedLog()) {
-    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div class="bg-[var(--color-bg-surface)] rounded-lg shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div class="sticky top-0 bg-[var(--color-bg-hover)] border-b border-[var(--color-border-default)] px-6 py-4 flex items-center justify-between">
-          <h2 class="text-lg font-bold text-[var(--color-text-primary)]">Détail du Log</h2>
+    @if (error()) {
+      <div class="logs-error">
+        <i class="fas fa-circle-xmark"></i>{{ error() }}
+      </div>
+    }
+
+    @if (loading()) {
+      <div class="flex items-center justify-center py-12">
+        <div class="text-center">
+          <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+          <p class="text-slate-600 dark:text-slate-400">Chargement des logs...</p>
+        </div>
+      </div>
+    } @else {
+      <!-- Tableau -->
+      <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden mb-6">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-slate-50 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600">
+              <tr>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Date</th>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Niveau</th>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Type</th>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Action</th>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Entité</th>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Utilisateur</th>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Temps</th>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Statut</th>
+                <th class="text-right px-6 py-4 text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+              @for (log of logs(); track log.id) {
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700 transition">
+                  <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+                    {{ log.dateCreation ? (log.dateCreation | date: 'dd/MM/yyyy HH:mm') : '-' }}
+                  </td>
+                  <td class="px-6 py-4 text-sm">
+                    <span class="text-lg" [innerHTML]="getNiveauIcon(log.niveau)"></span>
+                  </td>
+                  <td class="px-6 py-4 text-sm">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                      {{ log.typeLog || '-' }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 text-sm">
+                    <span
+                      class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
+                      [class]="getActionColor(log.actionType)"
+                    >
+                      {{ log.actionType || '-' }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 text-sm text-slate-600">{{ log.entiteType || '-' }}</td>
+                  <td class="px-6 py-4 text-sm text-slate-600">{{ getUserName(log) }}</td>
+                  <td class="px-6 py-4 text-sm font-mono" [class]="getResponseTimeColor(log.tempsReponseMs)">
+                    {{ log.tempsReponseMs ? (log.tempsReponseMs + 'ms') : '-' }}
+                  </td>
+                  <td class="px-6 py-4 text-sm">
+                    <span
+                      class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
+                      [class]="getStatutColor(log.statut)"
+                    >
+                      {{ log.statut || '-' }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      @if (log.alerte) {
+                        <span class="text-lg" title="Alerte">🔔</span>
+                      }
+                      @if (log.traceId) {
+                        <button
+                          (click)="viewTrace(log)"
+                          class="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                          title="Voir la trace"
+                        >
+                          🔗
+                        </button>
+                      }
+                      <button
+                        (click)="viewDetail(log)"
+                        class="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                      >
+                        Détails
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+
+              @if (logs().length === 0) {
+                <tr>
+                  <td class="px-6 py-8 text-center text-sm text-slate-500" colspan="9">
+                    📭 Aucun log trouvé
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="flex items-center justify-between">
+        <div class="text-sm text-slate-600">
+          Page <span class="font-bold">{{ page() }}</span> / <span class="font-bold">{{ pages() }}</span> • Total: <span class="font-bold">{{ total() }}</span>
+        </div>
+        <div class="flex gap-2">
           <button
-            (click)="closeDetail()"
-            class="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
+            class="px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition"
+            (click)="prev()"
+            [disabled]="page() <= 1"
           >
-            <i class="fas fa-times"></i>
+            ← Précédent
           </button>
-        </div>
-
-        <div class="p-6 space-y-4">
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="text-xs font-medium text-[var(--color-text-muted)]">ID</label>
-              <p class="text-sm font-mono text-[var(--color-text-primary)]">{{ selectedLog()?.id }}</p>
-            </div>
-            <div>
-              <label class="text-xs font-medium text-[var(--color-text-muted)]">Date</label>
-              <p class="text-sm text-[var(--color-text-primary)]">{{ selectedLog()?.dateCreation ? (selectedLog()?.dateCreation | date: 'dd/MM/yyyy HH:mm:ss') : '-' }}</p>
-            </div>
-            <div>
-              <label class="text-xs font-medium text-[var(--color-text-muted)]">Type Log</label>
-              <p class="text-sm text-[var(--color-text-primary)]">{{ selectedLog()?.typeLog || '-' }}</p>
-            </div>
-            <div>
-              <label class="text-xs font-medium text-[var(--color-text-muted)]">Action</label>
-              <p class="text-sm text-[var(--color-text-primary)]">{{ selectedLog()?.actionType || '-' }}</p>
-            </div>
-            <div>
-              <label class="text-xs font-medium text-[var(--color-text-muted)]">Entité</label>
-              <p class="text-sm text-[var(--color-text-primary)]">{{ selectedLog()?.entiteType || '-' }}</p>
-            </div>
-            <div>
-              <label class="text-xs font-medium text-[var(--color-text-muted)]">ID Entité</label>
-              <p class="text-sm text-[var(--color-text-primary)]">{{ selectedLog()?.entiteId || '-' }}</p>
-            </div>
-            <div>
-              <label class="text-xs font-medium text-[var(--color-text-muted)]">Utilisateur</label>
-              <p class="text-sm text-[var(--color-text-primary)]">{{ getUserName(selectedLog()!) }}</p>
-            </div>
-            <div>
-              <label class="text-xs font-medium text-[var(--color-text-muted)]">IP</label>
-              <p class="text-sm font-mono text-[var(--color-text-primary)]">{{ selectedLog()?.adresseIp || '-' }}</p>
-            </div>
-            <div>
-              <label class="text-xs font-medium text-[var(--color-text-muted)]">Endpoint</label>
-              <p class="text-sm font-mono text-[var(--color-text-primary)] break-all">{{ selectedLog()?.endpoint || '-' }}</p>
-            </div>
-            <div>
-              <label class="text-xs font-medium text-[var(--color-text-muted)]">Méthode HTTP</label>
-              <p class="text-sm text-[var(--color-text-primary)]">{{ selectedLog()?.methodeHttp || '-' }}</p>
-            </div>
-            <div>
-              <label class="text-xs font-medium text-[var(--color-text-muted)]">Code HTTP</label>
-              <p class="text-sm text-[var(--color-text-primary)]">{{ selectedLog()?.codeHttp || '-' }}</p>
-            </div>
-            <div>
-              <label class="text-xs font-medium text-[var(--color-text-muted)]">Temps Réponse</label>
-              <p class="text-sm text-[var(--color-text-primary)]">{{ selectedLog()?.tempsReponseMs ? (selectedLog()?.tempsReponseMs + ' ms') : '-' }}</p>
-            </div>
-            <div>
-              <label class="text-xs font-medium text-[var(--color-text-muted)]">Statut</label>
-              <p class="text-sm text-[var(--color-text-primary)]">{{ selectedLog()?.statut || '-' }}</p>
-            </div>
-            <div>
-              <label class="text-xs font-medium text-[var(--color-text-muted)]">Niveau</label>
-              <p class="text-sm text-[var(--color-text-primary)]">{{ selectedLog()?.niveau || '-' }}</p>
-            </div>
-            <div>
-              <label class="text-xs font-medium text-[var(--color-text-muted)]">Catégorie</label>
-              <p class="text-sm text-[var(--color-text-primary)]">{{ selectedLog()?.categorie || '-' }}</p>
-            </div>
-          </div>
-
-          @if (selectedLog()?.description) {
-            <div>
-              <label class="text-xs font-medium text-[var(--color-text-muted)]">Description</label>
-              <p class="text-sm text-[var(--color-text-primary)] break-words">{{ selectedLog()?.description }}</p>
-            </div>
-          }
-
-          @if (selectedLog()?.message) {
-            <div>
-              <label class="text-xs font-medium text-[var(--color-text-muted)]">Message</label>
-              <p class="text-sm text-[var(--color-text-primary)] break-words">{{ selectedLog()?.message }}</p>
-            </div>
-          }
-
-          @if (selectedLog()?.ancienneValeur) {
-            <div class="p-3 bg-[var(--color-bg-hover)] rounded border border-[var(--color-border-default)]">
-              <label class="text-xs font-medium text-[var(--color-text-muted)]">Ancienne Valeur</label>
-              <pre class="text-xs text-[var(--color-text-secondary)] overflow-auto mt-2">{{ selectedLog()?.ancienneValeur | json }}</pre>
-            </div>
-          }
-
-          @if (selectedLog()?.nouvelleValeur) {
-            <div class="p-3 bg-[var(--color-bg-hover)] rounded border border-[var(--color-border-default)]">
-              <label class="text-xs font-medium text-[var(--color-text-muted)]">Nouvelle Valeur</label>
-              <pre class="text-xs text-[var(--color-text-secondary)] overflow-auto mt-2">{{ selectedLog()?.nouvelleValeur | json }}</pre>
-            </div>
-          }
-
-          @if (selectedLog()?.messageErreur) {
-            <div class="p-3 bg-red-50 border border-red-200 rounded">
-              <label class="text-xs font-medium text-red-700">Message d'Erreur</label>
-              <p class="text-sm text-red-600 break-words">{{ selectedLog()?.messageErreur }}</p>
-            </div>
-          }
-        </div>
-
-        <div class="bg-[var(--color-bg-hover)] border-t border-[var(--color-border-default)] px-6 py-4 flex justify-end">
           <button
-            (click)="closeDetail()"
-            class="px-4 py-2 text-sm rounded bg-[var(--color-primary)] text-white hover:opacity-90 transition"
+            class="px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition"
+            (click)="next()"
+            [disabled]="page() >= pages()"
           >
-            Fermer
+            Suivant →
           </button>
         </div>
       </div>
-    </div>
-  }
+    }
+
+    <!-- Modal Détail -->
+    @if (showDetail() && selectedLog()) {
+      <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+          <div class="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 flex items-center justify-between">
+            <h2 class="text-xl font-bold text-white">📋 Détail du Log</h2>
+            <button
+              (click)="closeDetail()"
+              class="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-1 transition"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div class="p-6 space-y-6">
+            <!-- Informations principales -->
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div class="p-3 bg-slate-50 rounded-lg">
+                <p class="text-xs font-medium text-slate-600 mb-1">ID</p>
+                <p class="text-sm font-mono font-bold text-slate-900">{{ selectedLog()?.id }}</p>
+              </div>
+              <div class="p-3 bg-slate-50 rounded-lg">
+                <p class="text-xs font-medium text-slate-600 mb-1">Date</p>
+                <p class="text-sm font-bold text-slate-900">{{ selectedLog()?.dateCreation ? (selectedLog()?.dateCreation | date: 'dd/MM/yyyy HH:mm:ss') : '-' }}</p>
+              </div>
+              <div class="p-3 bg-slate-50 rounded-lg">
+                <p class="text-xs font-medium text-slate-600 mb-1">Type</p>
+                <p class="text-sm font-bold text-slate-900">{{ selectedLog()?.typeLog || '-' }}</p>
+              </div>
+              <div class="p-3 bg-slate-50 rounded-lg">
+                <p class="text-xs font-medium text-slate-600 mb-1">Action</p>
+                <p class="text-sm font-bold text-slate-900">{{ selectedLog()?.actionType || '-' }}</p>
+              </div>
+              <div class="p-3 bg-slate-50 rounded-lg">
+                <p class="text-xs font-medium text-slate-600 mb-1">Niveau</p>
+                <p class="text-sm font-bold text-slate-900">{{ selectedLog()?.niveau || '-' }}</p>
+              </div>
+              <div class="p-3 bg-slate-50 rounded-lg">
+                <p class="text-xs font-medium text-slate-600 mb-1">Catégorie</p>
+                <p class="text-sm font-bold text-slate-900">{{ selectedLog()?.categorie || '-' }}</p>
+              </div>
+            </div>
+
+            <!-- Entité et Utilisateur -->
+            <div class="grid grid-cols-2 gap-4">
+              <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p class="text-xs font-medium text-blue-700 mb-2">Entité</p>
+                <p class="text-sm font-bold text-slate-900">{{ selectedLog()?.entiteType || '-' }}</p>
+                @if (selectedLog()?.entiteId) {
+                  <p class="text-xs text-slate-600 mt-1">ID: {{ selectedLog()?.entiteId }}</p>
+                }
+              </div>
+              <div class="p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                <p class="text-xs font-medium text-purple-700 mb-2">Utilisateur</p>
+                <p class="text-sm font-bold text-slate-900">{{ getUserName(selectedLog()!) }}</p>
+                @if (selectedLog()?.utilisateur?.email) {
+                  <p class="text-xs text-slate-600 mt-1">{{ selectedLog()?.utilisateur?.email }}</p>
+                }
+              </div>
+            </div>
+
+            <!-- HTTP & Performance -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div class="p-3 bg-slate-50 rounded-lg">
+                <p class="text-xs font-medium text-slate-600 mb-1">Endpoint</p>
+                <p class="text-xs font-mono text-slate-900 break-all">{{ selectedLog()?.endpoint || '-' }}</p>
+              </div>
+              <div class="p-3 bg-slate-50 rounded-lg">
+                <p class="text-xs font-medium text-slate-600 mb-1">Méthode</p>
+                <p class="text-sm font-bold text-slate-900">{{ selectedLog()?.methodeHttp || '-' }}</p>
+              </div>
+              <div class="p-3 bg-slate-50 rounded-lg">
+                <p class="text-xs font-medium text-slate-600 mb-1">Code HTTP</p>
+                <p class="text-sm font-bold text-slate-900">{{ selectedLog()?.codeHttp || '-' }}</p>
+              </div>
+              <div class="p-3 bg-slate-50 rounded-lg">
+                <p class="text-xs font-medium text-slate-600 mb-1">Temps Réponse</p>
+                <p class="text-sm font-bold" [class]="getResponseTimeColor(selectedLog()?.tempsReponseMs)">
+                  {{ selectedLog()?.tempsReponseMs ? (selectedLog()?.tempsReponseMs + 'ms') : '-' }}
+                </p>
+              </div>
+            </div>
+
+            <!-- IP et Trace -->
+            <div class="grid grid-cols-2 gap-4">
+              <div class="p-3 bg-slate-50 rounded-lg">
+                <p class="text-xs font-medium text-slate-600 mb-1">Adresse IP</p>
+                <p class="text-sm font-mono font-bold text-slate-900">{{ selectedLog()?.adresseIp || '-' }}</p>
+              </div>
+              <div class="p-3 bg-slate-50 rounded-lg">
+                <p class="text-xs font-medium text-slate-600 mb-1">Trace ID</p>
+                <p class="text-sm font-mono font-bold text-slate-900 break-all">{{ selectedLog()?.traceId || '-' }}</p>
+              </div>
+            </div>
+
+            <!-- Statut et Alerte -->
+            <div class="grid grid-cols-2 gap-4">
+              <div class="p-3 bg-slate-50 rounded-lg">
+                <p class="text-xs font-medium text-slate-600 mb-1">Statut</p>
+                <span
+                  class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
+                  [class]="getStatutColor(selectedLog()?.statut)"
+                >
+                  {{ selectedLog()?.statut || '-' }}
+                </span>
+              </div>
+              <div class="p-3 bg-slate-50 rounded-lg">
+                <p class="text-xs font-medium text-slate-600 mb-1">Alerte</p>
+                <p class="text-sm font-bold text-slate-900">{{ selectedLog()?.alerte ? '🔔 Oui' : '✓ Non' }}</p>
+              </div>
+            </div>
+
+            <!-- Description et Message -->
+            @if (selectedLog()?.description) {
+              <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                <p class="text-xs font-medium text-slate-600 mb-2">Description</p>
+                <p class="text-sm text-slate-900 break-words">{{ selectedLog()?.description }}</p>
+              </div>
+            }
+
+            @if (selectedLog()?.message) {
+              <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                <p class="text-xs font-medium text-slate-600 mb-2">Message</p>
+                <p class="text-sm text-slate-900 break-words">{{ selectedLog()?.message }}</p>
+              </div>
+            }
+
+            <!-- Anciennes et Nouvelles Valeurs -->
+            @if (selectedLog()?.ancienneValeur) {
+              <div class="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                <p class="text-xs font-medium text-orange-700 mb-2">Ancienne Valeur</p>
+                <pre class="text-xs text-slate-900 overflow-auto bg-white p-2 rounded border border-orange-100">{{ selectedLog()?.ancienneValeur | json }}</pre>
+              </div>
+            }
+
+            @if (selectedLog()?.nouvelleValeur) {
+              <div class="p-4 bg-green-50 rounded-lg border border-green-200">
+                <p class="text-xs font-medium text-green-700 mb-2">Nouvelle Valeur</p>
+                <pre class="text-xs text-slate-900 overflow-auto bg-white p-2 rounded border border-green-100">{{ selectedLog()?.nouvelleValeur | json }}</pre>
+              </div>
+            }
+
+            <!-- Erreur -->
+            @if (selectedLog()?.messageErreur) {
+              <div class="p-4 bg-red-50 rounded-lg border border-red-200">
+                <p class="text-xs font-medium text-red-700 mb-2">Message d'Erreur</p>
+                <p class="text-sm text-red-900 break-words">{{ selectedLog()?.messageErreur }}</p>
+              </div>
+            }
+          </div>
+
+          <div class="bg-slate-50 border-t border-slate-200 px-6 py-4 flex justify-end gap-2">
+            <button
+              (click)="closeDetail()"
+              class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition font-medium text-sm"
+            >
+              Fermer
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
 </div>

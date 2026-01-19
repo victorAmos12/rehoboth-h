@@ -1,0 +1,239 @@
+/* ========================================
+   Styles partagés pour Logs & Audit pages
+   Utilise les variables CSS customisées
+   ======================================== */
+
+.logs-page {
+  background-color: var(--color-bg-main);
+  color: var(--color-text-primary);
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.logs-card {
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border-default);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.logs-card-header {
+  color: var(--color-text-primary);
+  font-weight: 600;
+  font-size: 1.125rem;
+  margin-bottom: 1rem;
+}
+
+.logs-input {
+  background-color: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  transition: border-color 0.2s ease;
+  width: 100%;
+  font-size: 0.875rem;
+}
+
+.logs-input:hover {
+  border-color: var(--color-border-focus);
+}
+
+.logs-input:focus {
+  border-color: var(--color-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.logs-select {
+  background-color: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  transition: border-color 0.2s ease;
+  width: 100%;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.logs-select:hover {
+  border-color: var(--color-border-focus);
+}
+
+.logs-select:focus {
+  border-color: var(--color-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.logs-select option {
+  background-color: var(--color-bg-card);
+  color: var(--color-text-primary);
+}
+
+.logs-label {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.logs-button {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.logs-button-primary {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.logs-button-primary:hover {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-2px);
+}
+
+.logs-button-secondary {
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-default);
+}
+
+.logs-button-secondary:hover {
+  background-color: var(--color-border-default);
+}
+
+.logs-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--color-bg-card);
+}
+
+.logs-table thead {
+  background-color: var(--color-bg-hover);
+  border-bottom: 2px solid var(--color-border-default);
+}
+
+.logs-table th {
+  color: var(--color-text-primary);
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.logs-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--color-border-default);
+  color: var(--color-text-secondary);
+}
+
+.logs-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.logs-table tbody tr:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.logs-filter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 1.5rem;
+  user-select: none;
+}
+
+.logs-filter-header:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.logs-filter-icon {
+  transition: transform 0.3s ease;
+  color: var(--color-primary);
+}
+
+.logs-filter-section {
+  border-top: 1px solid var(--color-border-default);
+  padding: 1.5rem;
+}
+
+.logs-error {
+  background-color: var(--color-error);
+  color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.logs-kpi-card {
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border-default);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.logs-kpi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.logs-kpi-icon {
+  font-size: 2rem;
+  opacity: 0.8;
+}
+
+.logs-kpi-value {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.logs-kpi-label {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.logs-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  color: var(--color-text-secondary);
+}
+
+.logs-spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 3px solid var(--color-border-default);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 1rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -49,16 +49,8 @@
     grid-template-columns: 1fr !important;
   }
 
-  :host ::ng-deep table {
-    font-size: 0.875rem;
-  }
-
   :host ::ng-deep .px-6 {
     padding-left: 1rem;
     padding-right: 1rem;
-  }
-
-  :host ::ng-deep .overflow-x-auto {
-    font-size: 0.75rem;
   }
 }
