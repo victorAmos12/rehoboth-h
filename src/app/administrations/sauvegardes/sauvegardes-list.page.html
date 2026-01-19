@@ -1,0 +1,1078 @@
+<div class="p-6 bg-[var(--color-bg-primary)] min-h-screen">
+  <!-- En-tête avec boutons d'action -->
+  <div class="flex items-start justify-between gap-4 mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-[var(--color-text-primary)]">Gestion des Sauvegardes</h1>
+      <p class="text-sm text-[var(--color-text-muted)] mt-1">Administration / Sauvegardes</p>
+    </div>
+    <div class="flex gap-2">
+      <button
+        (click)="toggleScheduledTab()"
+        class="flex items-center gap-2 px-4 py-2 rounded-lg"
+        [class]="showScheduledTab() ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700'"
+        title="Voir les sauvegardes programmées"
+      >
+        <i class="fas fa-calendar-alt"></i>
+        Programmées
+        @if (scheduledBackups().length > 0) {
+          <span class="ml-2 px-2 py-0.5 rounded-full text-xs font-bold bg-white" [class]="showScheduledTab() ? 'text-purple-600' : 'text-gray-700'">
+            {{ scheduledBackups().length }}
+          </span>
+        }
+      </button>
+      <button
+        (click)="openScheduleModal()"
+        class="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-600 text-white hover:opacity-90 transition font-medium"
+        title="Programmer une sauvegarde automatique"
+      >
+        <i class="fas fa-clock"></i>
+        Programmer
+      </button>
+      <button
+        (click)="openCreateModal()"
+        class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--color-primary)] text-white hover:opacity-90 transition font-medium"
+      >
+        <i class="fas fa-plus"></i>
+        Nouvelle Sauvegarde
+      </button>
+    </div>
+  </div>
+
+  <!-- Statistiques KPI -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+    <div class="bg-[var(--color-bg-surface)] rounded-lg shadow-sm p-4 border border-[var(--color-border-default)]">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-[var(--color-text-muted)] uppercase">Total</p>
+          <p class="text-2xl font-bold text-[var(--color-text-primary)] mt-1">{{ stats().totalBackups }}</p>
+        </div>
+        <div class="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
+          <i class="fas fa-database text-blue-600 text-lg"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-[var(--color-bg-surface)] rounded-lg shadow-sm p-4 border border-[var(--color-border-default)]">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-[var(--color-text-muted)] uppercase">Réussies</p>
+          <p class="text-2xl font-bold text-green-600 mt-1">{{ stats().successCount }}</p>
+          <p class="text-xs text-green-600 mt-1">{{ successRate() }}%</p>
+        </div>
+        <div class="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center">
+          <i class="fas fa-check-circle text-green-600 text-lg"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-[var(--color-bg-surface)] rounded-lg shadow-sm p-4 border border-[var(--color-border-default)]">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-[var(--color-text-muted)] uppercase">Échouées</p>
+          <p class="text-2xl font-bold text-red-600 mt-1">{{ stats().failedCount }}</p>
+          <p class="text-xs text-red-600 mt-1">{{ failureRate() }}%</p>
+        </div>
+        <div class="w-12 h-12 rounded-lg bg-red-100 flex items-center justify-center">
+          <i class="fas fa-times-circle text-red-600 text-lg"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-[var(--color-bg-surface)] rounded-lg shadow-sm p-4 border border-[var(--color-border-default)]">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-[var(--color-text-muted)] uppercase">En cours</p>
+          <p class="text-2xl font-bold text-yellow-600 mt-1">{{ stats().pendingCount }}</p>
+        </div>
+        <div class="w-12 h-12 rounded-lg bg-yellow-100 flex items-center justify-center">
+          <i class="fas fa-hourglass-half text-yellow-600 text-lg"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-[var(--color-bg-surface)] rounded-lg shadow-sm p-4 border border-[var(--color-border-default)]">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-[var(--color-text-muted)] uppercase">Taille Totale</p>
+          <p class="text-2xl font-bold text-[var(--color-text-primary)] mt-1">{{ stats().totalSizeGb }} GB</p>
+        </div>
+        <div class="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
+          <i class="fas fa-hdd text-purple-600 text-lg"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtres -->
+  <div class="bg-[var(--color-bg-surface)] rounded-lg shadow-sm p-4 border border-[var(--color-border-default)] mb-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-sm font-semibold text-[var(--color-text-primary)]">
+        <i class="fas fa-filter mr-2"></i>Filtres
+      </h2>
+      <button
+        (click)="resetFilters()"
+        class="text-xs text-[var(--color-primary)] hover:underline"
+      >
+        Réinitialiser
+      </button>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+      <div>
+        <label class="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Type</label>
+        <select
+          [(ngModel)]="filterType"
+          class="w-full px-3 py-2 text-sm bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] rounded border border-[var(--color-border-default)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+        >
+          <option value="">Tous</option>
+          <option value="COMPLETE">Complète</option>
+          <option value="INCREMENTAL">Incrémentale</option>
+          <option value="DIFFERENTIAL">Différentielle</option>
+          <option value="SNAPSHOT">Snapshot</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Statut</label>
+        <select
+          [(ngModel)]="filterStatut"
+          class="w-full px-3 py-2 text-sm bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] rounded border border-[var(--color-border-default)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+        >
+          <option value="">Tous</option>
+          <option value="PENDING">En attente</option>
+          <option value="IN_PROGRESS">En cours</option>
+          <option value="SUCCESS">Réussi</option>
+          <option value="FAILED">Échoué</option>
+          <option value="VERIFIED">Vérifié</option>
+          <option value="RESTORING">En restauration</option>
+          <option value="DELETED">Supprimée</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Numéro</label>
+        <input
+          type="text"
+          [(ngModel)]="filterNumero"
+          placeholder="BKP-..."
+          class="w-full px-3 py-2 text-sm bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] rounded border border-[var(--color-border-default)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+        />
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Date Début</label>
+        <input
+          type="date"
+          [(ngModel)]="filterDateFrom"
+          class="w-full px-3 py-2 text-sm bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] rounded border border-[var(--color-border-default)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+        />
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Date Fin</label>
+        <input
+          type="date"
+          [(ngModel)]="filterDateTo"
+          class="w-full px-3 py-2 text-sm bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] rounded border border-[var(--color-border-default)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+        />
+      </div>
+    </div>
+
+    <div class="flex gap-2 mt-4">
+      <button
+        (click)="applyFilters()"
+        class="px-4 py-2 text-sm rounded bg-[var(--color-primary)] text-white hover:opacity-90 transition font-medium"
+      >
+        <i class="fas fa-search mr-2"></i>Appliquer
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages d'erreur -->
+  @if (error()) {
+    <div class="mb-4 p-4 rounded-lg bg-red-50 text-red-700 border border-red-200 text-sm flex items-start gap-3">
+      <i class="fas fa-exclamation-circle mt-0.5"></i>
+      <div>
+        <p class="font-medium">Erreur</p>
+        <p>{{ error() }}</p>
+      </div>
+    </div>
+  }
+
+  <!-- Tableau des sauvegardes -->
+  @if (loading()) {
+    <div class="text-center py-12">
+      <div class="inline-block">
+        <i class="fas fa-spinner fa-spin text-2xl text-[var(--color-primary)] mb-3"></i>
+        <p class="text-[var(--color-text-muted)] text-sm">Chargement des sauvegardes...</p>
+      </div>
+    </div>
+  } @else {
+    <div class="bg-[var(--color-bg-surface)] rounded-lg shadow-sm border border-[var(--color-border-default)] overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full">
+          <thead class="bg-[var(--color-bg-hover)] border-b border-[var(--color-border-default)]">
+            <tr>
+              <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Numéro</th>
+              <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Type</th>
+              <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Date Début</th>
+              <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Taille</th>
+              <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Durée</th>
+              <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Statut</th>
+              <th class="text-right text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of sauvegardes(); track s.id) {
+              <tr class="border-t border-[var(--color-border-default)] hover:bg-[var(--color-bg-hover)] transition">
+                <td class="px-4 py-3 text-sm font-mono text-[var(--color-text-secondary)]">
+                  <span class="inline-flex items-center gap-2">
+                    <i class="fas fa-save text-[var(--color-primary)]"></i>
+                    {{ s.numeroSauvegarde || s.backupId || '-' }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-sm">
+                  <span class="inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs bg-[var(--color-primary-soft)] text-[var(--color-primary)]">
+                    <i [class]="'fas ' + getTypeIcon(s.typeBackup)"></i>
+                    {{ s.typeBackup || '-' }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-sm text-[var(--color-text-secondary)]">
+                  {{ s.dateDebut ? (s.dateDebut | date: 'dd/MM/yyyy HH:mm') : '-' }}
+                </td>
+                <td class="px-4 py-3 text-sm text-[var(--color-text-secondary)]">
+                  <span class="font-medium">{{ s.tailleGb ? (s.tailleGb + ' GB') : '-' }}</span>
+                </td>
+                <td class="px-4 py-3 text-sm text-[var(--color-text-secondary)]">
+                  {{ formatDuration(s.dureeSecondes) }}
+                </td>
+                <td class="px-4 py-3">
+                  <span
+                    class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium cursor-pointer hover:opacity-80 transition"
+                    [class]="getStatutColor(s.statut)"
+                    (click)="openStatusModal(s)"
+                    title="Cliquer pour changer le statut"
+                  >
+                    <i [class]="'fas ' + getStatusIcon(s.statut)"></i>
+                    {{ s.statut || '-' }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <div class="flex items-center justify-end gap-1">
+                    <!-- Bouton Valider (PENDING → SUCCESS) -->
+                    @if (s.statut === 'PENDING') {
+                      <button
+                        (click)="completeBackup(s)"
+                        [disabled]="actionLoading() === s.id"
+                        title="Valider et compléter la sauvegarde"
+                        class="p-2 rounded hover:bg-green-100 text-green-600 hover:text-green-700 transition disabled:opacity-50 relative group"
+                      >
+                        @if (actionLoading() === s.id) {
+                          <i class="fas fa-spinner fa-spin text-lg"></i>
+                          <span class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition">Validation en cours...</span>
+                        } @else {
+                          <i class="fas fa-check-circle text-lg"></i>
+                          <span class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition">Valider</span>
+                        }
+                      </button>
+                    }
+
+                    <!-- Bouton Télécharger (SUCCESS) -->
+                    @if (s.statut === 'SUCCESS') {
+                      <button
+                        (click)="downloadBackup(s)"
+                        [disabled]="actionLoading() === s.id"
+                        title="Télécharger"
+                        class="p-2 rounded hover:bg-blue-100 text-blue-600 hover:text-blue-700 transition disabled:opacity-50 relative group"
+                      >
+                        @if (actionLoading() === s.id) {
+                          <i class="fas fa-spinner fa-spin text-lg"></i>
+                        } @else {
+                          <i class="fas fa-download text-lg"></i>
+                          <span class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition">Télécharger</span>
+                        }
+                      </button>
+                    }
+
+                    <!-- Bouton Restaurer (SUCCESS) -->
+                    @if (s.statut === 'SUCCESS') {
+                      <button
+                        (click)="prepareRestore(s)"
+                        [disabled]="actionLoading() === s.id"
+                        title="Restaurer"
+                        class="p-2 rounded hover:bg-orange-100 text-orange-600 hover:text-orange-700 transition disabled:opacity-50 relative group"
+                      >
+                        @if (actionLoading() === s.id) {
+                          <i class="fas fa-spinner fa-spin text-lg"></i>
+                        } @else {
+                          <i class="fas fa-undo text-lg"></i>
+                          <span class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition">Restaurer</span>
+                        }
+                      </button>
+                    }
+
+                    <!-- Bouton Détails -->
+                    <button
+                      (click)="viewDetail(s)"
+                      title="Voir les détails"
+                      class="p-2 rounded hover:bg-purple-100 text-purple-600 hover:text-purple-700 transition relative group"
+                    >
+                      <i class="fas fa-info-circle text-lg"></i>
+                      <span class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition">Détails</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+
+            @if (sauvegardes().length === 0) {
+              <tr>
+                <td class="px-4 py-12 text-center text-sm text-[var(--color-text-muted)] font-medium" colspan="7">
+                  <i class="fas fa-inbox text-2xl mb-2 block opacity-50"></i>
+                  Aucune sauvegarde trouvée
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="bg-[var(--color-bg-hover)] border-t border-[var(--color-border-default)] px-4 py-3 flex items-center justify-between text-sm text-[var(--color-text-muted)]">
+        <div>
+          Page <span class="font-medium">{{ page() }}</span> / <span class="font-medium">{{ pages() }}</span> • Total: <span class="font-medium">{{ total() }}</span>
+        </div>
+        <div class="flex gap-2">
+          <button
+            class="px-3 py-1 rounded border border-[var(--color-border-default)] hover:bg-[var(--color-bg-surface)] disabled:opacity-50 text-sm transition"
+            (click)="prev()"
+            [disabled]="page() <= 1"
+          >
+            <i class="fas fa-chevron-left mr-1"></i>Précédent
+          </button>
+          <button
+            class="px-3 py-1 rounded border border-[var(--color-border-default)] hover:bg-[var(--color-bg-surface)] disabled:opacity-50 text-sm transition"
+            (click)="next()"
+            [disabled]="page() >= pages()"
+          >
+            Suivant<i class="fas fa-chevron-right ml-1"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Modal Restaurer - Étape 1: Instructions -->
+  @if (showRestoreModal() && selectedSauvegarde()) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-[var(--color-bg-surface)] rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="sticky top-0 bg-[var(--color-bg-hover)] border-b border-[var(--color-border-default)] px-6 py-4 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
+              <i class="fas fa-undo text-orange-600"></i>
+            </div>
+            <div>
+              <h2 class="text-lg font-bold text-[var(--color-text-primary)]">Restaurer la Sauvegarde</h2>
+              <p class="text-xs text-[var(--color-text-muted)]">{{ selectedSauvegarde()?.numeroSauvegarde }}</p>
+            </div>
+          </div>
+          <button
+            (click)="closeRestoreModal()"
+            class="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
+          >
+            <i class="fas fa-times text-lg"></i>
+          </button>
+        </div>
+
+        <div class="p-6 space-y-6">
+          <!-- Avertissement -->
+          <div class="p-4 rounded-lg bg-orange-50 border border-orange-200">
+            <p class="text-sm text-orange-700">
+              <i class="fas fa-exclamation-triangle mr-2"></i>
+              <strong>Attention !</strong> Cette action restaurera les données à partir de la sauvegarde sélectionnée. Les données actuelles seront remplacées et le système redémarrera.
+            </p>
+          </div>
+
+          <!-- Informations de la sauvegarde -->
+          <div class="grid grid-cols-2 gap-4">
+            <div class="p-3 rounded-lg bg-[var(--color-bg-hover)]">
+              <p class="text-xs font-medium text-[var(--color-text-muted)] uppercase">Type</p>
+              <p class="text-sm font-medium text-[var(--color-text-primary)] mt-1">{{ selectedSauvegarde()?.typeBackup }}</p>
+            </div>
+            <div class="p-3 rounded-lg bg-[var(--color-bg-hover)]">
+              <p class="text-xs font-medium text-[var(--color-text-muted)] uppercase">Taille</p>
+              <p class="text-sm font-medium text-[var(--color-text-primary)] mt-1">{{ selectedSauvegarde()?.tailleGb }} GB</p>
+            </div>
+            <div class="p-3 rounded-lg bg-[var(--color-bg-hover)]">
+              <p class="text-xs font-medium text-[var(--color-text-muted)] uppercase">Date</p>
+              <p class="text-sm font-medium text-[var(--color-text-primary)] mt-1">{{ selectedSauvegarde()?.dateDebut | date: 'dd/MM/yyyy HH:mm' }}</p>
+            </div>
+            <div class="p-3 rounded-lg bg-[var(--color-bg-hover)]">
+              <p class="text-xs font-medium text-[var(--color-text-muted)] uppercase">Durée</p>
+              <p class="text-sm font-medium text-[var(--color-text-primary)] mt-1">{{ formatDuration(selectedSauvegarde()?.dureeSecondes) }}</p>
+            </div>
+          </div>
+
+          <!-- Chaîne de restauration -->
+          @if (restoreChain().length > 0) {
+            <div>
+              <h3 class="text-sm font-semibold text-[var(--color-text-primary)] mb-3">
+                <i class="fas fa-link mr-2"></i>Chaîne de Restauration
+              </h3>
+              <div class="space-y-2">
+                @for (item of restoreChain(); track item.id) {
+                  <div class="flex items-center gap-3 p-3 rounded-lg bg-[var(--color-bg-hover)]">
+                    <div class="flex-shrink-0">
+                      @if (item.current) {
+                        <div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
+                          <i class="fas fa-check text-orange-600 text-sm"></i>
+                        </div>
+                      } @else {
+                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                          <i class="fas fa-database text-blue-600 text-sm"></i>
+                        </div>
+                      }
+                    </div>
+                    <div class="flex-1">
+                      <p class="text-sm font-medium text-[var(--color-text-primary)]">{{ item.backupId }}</p>
+                      <p class="text-xs text-[var(--color-text-muted)]">{{ item.typeBackup }} • {{ item.dateDebut | date: 'dd/MM/yyyy HH:mm' }}</p>
+                    </div>
+                    @if (item.required) {
+                      <span class="px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-700">Requis</span>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Instructions de restauration -->
+          @if (restoreInstructions().length > 0) {
+            <div>
+              <h3 class="text-sm font-semibold text-[var(--color-text-primary)] mb-3">
+                <i class="fas fa-list-check mr-2"></i>Instructions de Restauration
+              </h3>
+              <ol class="space-y-2">
+                @for (instruction of restoreInstructions(); track $index) {
+                  <li class="flex gap-3 text-sm text-[var(--color-text-secondary)]">
+                    <span class="flex-shrink-0 w-6 h-6 rounded-full bg-[var(--color-primary-soft)] flex items-center justify-center text-xs font-bold text-[var(--color-primary)]">{{ $index + 1 }}</span>
+                    <span>{{ instruction }}</span>
+                  </li>
+                }
+              </ol>
+            </div>
+          }
+        </div>
+
+        <div class="bg-[var(--color-bg-hover)] border-t border-[var(--color-border-default)] px-6 py-4 flex justify-end gap-2">
+          <button
+            (click)="closeRestoreModal()"
+            class="px-4 py-2 text-sm rounded border border-[var(--color-border-default)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-surface)] transition font-medium"
+          >
+            Annuler
+          </button>
+          <button
+            (click)="confirmRestore()"
+            class="px-4 py-2 text-sm rounded bg-orange-600 text-white hover:opacity-90 transition font-medium flex items-center gap-2"
+          >
+            <i class="fas fa-arrow-right"></i>
+            Continuer
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Modal Confirmation Restauration - Étape 2 -->
+  @if (showRestoreConfirmModal() && selectedSauvegarde()) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-[var(--color-bg-surface)] rounded-lg shadow-xl max-w-md w-full">
+        <div class="bg-red-50 border-b border-red-200 px-6 py-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-exclamation-triangle text-red-600 text-lg"></i>
+            </div>
+            <h2 class="text-lg font-bold text-red-700">Confirmer la Restauration</h2>
+          </div>
+        </div>
+
+        <div class="p-6 space-y-4">
+          <p class="text-sm text-[var(--color-text-secondary)]">
+            Vous êtes sur le point de restaurer la sauvegarde <strong>{{ selectedSauvegarde()?.numeroSauvegarde }}</strong>.
+          </p>
+
+          <div class="p-4 rounded-lg bg-red-50 border border-red-200">
+            <p class="text-sm text-red-700">
+              <i class="fas fa-info-circle mr-2"></i>
+              <strong>Conséquences :</strong>
+            </p>
+            <ul class="text-sm text-red-600 mt-2 space-y-1 ml-6 list-disc">
+              <li>Toutes les données actuelles seront remplacées</li>
+              <li>Le système redémarrera automatiquement</li>
+              <li>Vous serez déconnecté et devrez vous reconnecter</li>
+              <li>Cette action est irréversible</li>
+            </ul>
+          </div>
+
+          <div class="p-3 rounded-lg bg-[var(--color-bg-hover)]">
+            <p class="text-xs font-medium text-[var(--color-text-muted)] uppercase">Sauvegarde à restaurer</p>
+            <p class="text-sm font-mono text-[var(--color-text-primary)] mt-1">{{ selectedSauvegarde()?.backupId }}</p>
+          </div>
+        </div>
+
+        <div class="bg-[var(--color-bg-hover)] border-t border-[var(--color-border-default)] px-6 py-4 flex justify-end gap-2">
+          <button
+            (click)="cancelRestore()"
+            [disabled]="isRestoringInProgress()"
+            class="px-4 py-2 text-sm rounded border border-[var(--color-border-default)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-surface)] transition font-medium disabled:opacity-50"
+          >
+            Annuler
+          </button>
+          <button
+            (click)="executeRestore()"
+            [disabled]="isRestoringInProgress()"
+            class="px-4 py-2 text-sm rounded bg-red-600 text-white hover:opacity-90 transition font-medium disabled:opacity-50 flex items-center gap-2"
+          >
+            @if (isRestoringInProgress()) {
+              <i class="fas fa-spinner fa-spin"></i>
+              <span>Restauration en cours...</span>
+            } @else {
+              <i class="fas fa-check"></i>
+              <span>Confirmer la Restauration</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Loader bloquant pendant la restauration -->
+  @if (isRestoringInProgress()) {
+    <div class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[9999]">
+      <div class="bg-[var(--color-bg-surface)] rounded-lg shadow-2xl p-8 text-center max-w-md">
+        <div class="mb-6">
+          <div class="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-spinner fa-spin text-3xl text-orange-600"></i>
+          </div>
+          <h2 class="text-xl font-bold text-[var(--color-text-primary)]">Restauration en cours</h2>
+          <p class="text-sm text-[var(--color-text-muted)] mt-2">Veuillez patienter, le système restaure les données...</p>
+        </div>
+
+        <div class="space-y-3">
+          <div class="w-full bg-[var(--color-bg-hover)] rounded-full h-2 overflow-hidden">
+            <div class="bg-orange-600 h-full w-full animate-pulse"></div>
+          </div>
+          <p class="text-xs text-[var(--color-text-muted)]">
+            <i class="fas fa-info-circle mr-1"></i>
+            Ne fermez pas cette page. Vous serez redirigé automatiquement.
+          </p>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Modal Créer Sauvegarde - Design Moderne -->
+  @if (showCreateModal()) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+      <div class="bg-[var(--color-bg-surface)] rounded-xl shadow-2xl max-w-2xl w-full overflow-hidden">
+        <!-- Header Gradient -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-8">
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 rounded-lg bg-white/20 flex items-center justify-center">
+              <i class="fas fa-plus-circle text-white text-2xl"></i>
+            </div>
+            <div>
+              <h2 class="text-2xl font-bold text-white">Créer une Sauvegarde</h2>
+              <p class="text-blue-100 text-sm mt-1">Sélectionnez le type de sauvegarde à effectuer</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="p-8">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Option 1: Complète -->
+            <button
+              (click)="createBackup('COMPLETE')"
+              [disabled]="actionLoading() === -1"
+              class="group relative p-6 rounded-xl border-2 border-transparent hover:border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-left"
+            >
+              <div class="absolute top-4 right-4 w-12 h-12 rounded-lg bg-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <i class="fas fa-database text-white text-lg"></i>
+              </div>
+              <div class="pr-16">
+                <h3 class="font-bold text-blue-900 text-lg mb-2">Complète</h3>
+                <p class="text-sm text-blue-700 mb-3">Sauvegarde complète de toutes les données</p>
+                <div class="flex items-center gap-2 text-xs text-blue-600 font-medium">
+                  <i class="fas fa-check-circle"></i>
+                  <span>Recommandée</span>
+                </div>
+              </div>
+            </button>
+
+            <!-- Option 2: Incrémentale -->
+            <button
+              (click)="createBackup('INCREMENTAL')"
+              [disabled]="actionLoading() === -1"
+              class="group relative p-6 rounded-xl border-2 border-transparent hover:border-green-500 bg-gradient-to-br from-green-50 to-green-100 hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-left"
+            >
+              <div class="absolute top-4 right-4 w-12 h-12 rounded-lg bg-green-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <i class="fas fa-plus-circle text-white text-lg"></i>
+              </div>
+              <div class="pr-16">
+                <h3 class="font-bold text-green-900 text-lg mb-2">Incrémentale</h3>
+                <p class="text-sm text-green-700 mb-3">Modifications depuis la dernière sauvegarde</p>
+                <div class="flex items-center gap-2 text-xs text-green-600 font-medium">
+                  <i class="fas fa-bolt"></i>
+                  <span>Rapide</span>
+                </div>
+              </div>
+            </button>
+
+            <!-- Option 3: Différentielle -->
+            <button
+              (click)="createBackup('DIFFERENTIAL')"
+              [disabled]="actionLoading() === -1"
+              class="group relative p-6 rounded-xl border-2 border-transparent hover:border-purple-500 bg-gradient-to-br from-purple-50 to-purple-100 hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-left"
+            >
+              <div class="absolute top-4 right-4 w-12 h-12 rounded-lg bg-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <i class="fas fa-exchange-alt text-white text-lg"></i>
+              </div>
+              <div class="pr-16">
+                <h3 class="font-bold text-purple-900 text-lg mb-2">Différentielle</h3>
+                <p class="text-sm text-purple-700 mb-3">Modifications depuis la dernière complète</p>
+                <div class="flex items-center gap-2 text-xs text-purple-600 font-medium">
+                  <i class="fas fa-balance-scale"></i>
+                  <span>Équilibrée</span>
+                </div>
+              </div>
+            </button>
+          </div>
+
+          <!-- Info Box -->
+          <div class="mt-8 p-4 rounded-lg bg-blue-50 border border-blue-200">
+            <div class="flex gap-3">
+              <i class="fas fa-info-circle text-blue-600 mt-0.5 flex-shrink-0"></i>
+              <div class="text-sm text-blue-700">
+                <p class="font-medium mb-1">Conseil :</p>
+                <p>Commencez par une sauvegarde complète, puis utilisez les sauvegardes incrémentielles pour optimiser l'espace disque.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="bg-[var(--color-bg-hover)] border-t border-[var(--color-border-default)] px-8 py-4 flex justify-end gap-3">
+          <button
+            (click)="closeCreateModal()"
+            class="px-6 py-2 text-sm rounded-lg border border-[var(--color-border-default)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-surface)] transition font-medium"
+          >
+            Annuler
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Modal Programmer Sauvegarde -->
+  @if (showScheduleModal()) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-[var(--color-bg-surface)] rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+        <!-- Header -->
+        <div class="bg-[var(--color-bg-hover)] border-b border-[var(--color-border-default)] px-6 py-4 flex items-center justify-between flex-shrink-0">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
+              <i class="fas fa-clock text-purple-600"></i>
+            </div>
+            <div>
+              <h2 class="text-lg font-bold text-[var(--color-text-primary)]">Programmer une Sauvegarde</h2>
+              <p class="text-xs text-[var(--color-text-muted)]">Configurez une sauvegarde automatique</p>
+            </div>
+          </div>
+          <button
+            (click)="closeScheduleModal()"
+            class="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition"
+          >
+            <i class="fas fa-times text-lg"></i>
+          </button>
+        </div>
+
+        <!-- Content - Scrollable -->
+        <div class="overflow-y-auto flex-1 p-6">
+          <div class="grid grid-cols-2 gap-4">
+            <!-- Type de Sauvegarde -->
+            <div>
+              <label class="block text-xs font-medium text-[var(--color-text-muted)] mb-2 uppercase">Type de Sauvegarde</label>
+              <select
+                [(ngModel)]="scheduleForm().typeBackup"
+                class="w-full px-3 py-2 text-sm bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] rounded border border-[var(--color-border-default)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              >
+                <option value="COMPLETE">Complète</option>
+                <option value="INCREMENTAL">Incrémentale</option>
+                <option value="DIFFERENTIAL">Différentielle</option>
+                <option value="SNAPSHOT">Snapshot</option>
+              </select>
+            </div>
+
+            <!-- Fréquence -->
+            <div>
+              <label class="block text-xs font-medium text-[var(--color-text-muted)] mb-2 uppercase">Fréquence</label>
+              <select
+                [(ngModel)]="scheduleForm().frequency"
+                class="w-full px-3 py-2 text-sm bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] rounded border border-[var(--color-border-default)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              >
+                <option value="HOURLY">Horaire</option>
+                <option value="DAILY">Quotidienne</option>
+                <option value="WEEKLY">Hebdomadaire</option>
+                <option value="MONTHLY">Mensuelle</option>
+              </select>
+            </div>
+
+            <!-- Heure d'exécution -->
+            <div>
+              <label class="block text-xs font-medium text-[var(--color-text-muted)] mb-2 uppercase">Heure d'exécution</label>
+              <input
+                type="time"
+                [(ngModel)]="scheduleForm().time"
+                class="w-full px-3 py-2 text-sm bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] rounded border border-[var(--color-border-default)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              />
+            </div>
+
+            <!-- Rétention -->
+            <div>
+              <label class="block text-xs font-medium text-[var(--color-text-muted)] mb-2 uppercase">Rétention (jours)</label>
+              <input
+                type="number"
+                [(ngModel)]="scheduleForm().retentionDays"
+                min="1"
+                max="365"
+                class="w-full px-3 py-2 text-sm bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] rounded border border-[var(--color-border-default)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              />
+            </div>
+
+            <!-- Jour de la semaine -->
+            <div>
+              <label class="block text-xs font-medium text-[var(--color-text-muted)] mb-2 uppercase">Jour de la semaine</label>
+              <input
+                type="number"
+                [(ngModel)]="scheduleForm().dayOfWeek"
+                min="0"
+                max="6"
+                placeholder="0-6 (optionnel)"
+                class="w-full px-3 py-2 text-sm bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] rounded border border-[var(--color-border-default)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              />
+              <p class="text-xs text-[var(--color-text-muted)] mt-1">0=Dim, 1=Lun, 2=Mar, 3=Mer, 4=Jeu, 5=Ven, 6=Sam</p>
+            </div>
+
+            <!-- Jour du mois -->
+            <div>
+              <label class="block text-xs font-medium text-[var(--color-text-muted)] mb-2 uppercase">Jour du mois</label>
+              <input
+                type="number"
+                [(ngModel)]="scheduleForm().dayOfMonth"
+                min="1"
+                max="31"
+                placeholder="1-31 (optionnel)"
+                class="w-full px-3 py-2 text-sm bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] rounded border border-[var(--color-border-default)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              />
+            </div>
+
+            <!-- Localisation Principale -->
+            <div class="col-span-2">
+              <label class="block text-xs font-medium text-[var(--color-text-muted)] mb-2 uppercase">Localisation Principale *</label>
+              <input
+                type="text"
+                [(ngModel)]="scheduleForm().localisationBackup"
+                placeholder="/backups/daily"
+                class="w-full px-3 py-2 text-sm bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] rounded border border-[var(--color-border-default)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              />
+            </div>
+
+            <!-- Localisation Secondaire -->
+            <div class="col-span-2">
+              <label class="block text-xs font-medium text-[var(--color-text-muted)] mb-2 uppercase">Localisation Secondaire</label>
+              <input
+                type="text"
+                [(ngModel)]="scheduleForm().localisationSecondaire"
+                placeholder="/backups/secondary"
+                class="w-full px-3 py-2 text-sm bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] rounded border border-[var(--color-border-default)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              />
+            </div>
+
+            <!-- Notes -->
+            <div class="col-span-2">
+              <label class="block text-xs font-medium text-[var(--color-text-muted)] mb-2 uppercase">Notes</label>
+              <textarea
+                [(ngModel)]="scheduleForm().notes"
+                placeholder="Notes optionnelles..."
+                rows="2"
+                class="w-full px-3 py-2 text-sm bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] rounded border border-[var(--color-border-default)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] resize-none"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer - Fixed -->
+        <div class="bg-[var(--color-bg-hover)] border-t border-[var(--color-border-default)] px-6 py-4 flex justify-end gap-2 flex-shrink-0">
+          <button
+            (click)="closeScheduleModal()"
+            class="px-4 py-2 text-sm rounded border border-[var(--color-border-default)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-surface)] transition font-medium"
+          >
+            Annuler
+          </button>
+          <button
+            (click)="scheduleBackup()"
+            [disabled]="actionLoading() === -2"
+            class="px-4 py-2 text-sm rounded bg-purple-600 text-white hover:opacity-90 transition disabled:opacity-50 font-medium flex items-center gap-2"
+          >
+            @if (actionLoading() === -2) {
+              <i class="fas fa-spinner fa-spin"></i>
+              <span>Programmation...</span>
+            } @else {
+              <i class="fas fa-clock"></i>
+              <span>Programmer</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Modal Changer Statut -->
+  @if (showStatusModal() && selectedSauvegarde()) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-[var(--color-bg-surface)] rounded-lg shadow-xl max-w-md w-full">
+        <div class="bg-[var(--color-bg-hover)] border-b border-[var(--color-border-default)] px-6 py-4 flex items-center justify-between">
+          <h2 class="text-lg font-bold text-[var(--color-text-primary)]">Changer le Statut</h2>
+          <button
+            (click)="closeStatusModal()"
+            class="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="p-6 space-y-3">
+          <div class="p-3 rounded-lg bg-[var(--color-bg-hover)]">
+            <p class="text-xs font-medium text-[var(--color-text-muted)] uppercase">Statut Actuel</p>
+            <p class="text-sm font-medium text-[var(--color-text-primary)] mt-1">{{ selectedSauvegarde()?.statut }}</p>
+          </div>
+
+          <p class="text-sm text-[var(--color-text-muted)]">Sélectionnez le nouveau statut :</p>
+
+          @for (status of getNextStatuses(selectedSauvegarde()?.statut); track status) {
+            <button
+              (click)="changeStatus(status)"
+              [disabled]="actionLoading() === selectedSauvegarde()?.id"
+              class="w-full p-3 rounded-lg border-2 border-[var(--color-border-default)] hover:border-[var(--color-primary)] hover:bg-[var(--color-bg-hover)] transition text-left disabled:opacity-50"
+            >
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-[var(--color-primary-soft)] flex items-center justify-center flex-shrink-0">
+                  <i [class]="'fas ' + getStatusIcon(status) + ' text-[var(--color-primary)]'"></i>
+                </div>
+                <div>
+                  <p class="font-medium text-[var(--color-text-primary)]">{{ status }}</p>
+                </div>
+              </div>
+            </button>
+          }
+        </div>
+
+        <div class="bg-[var(--color-bg-hover)] border-t border-[var(--color-border-default)] px-6 py-4 flex justify-end">
+          <button
+            (click)="closeStatusModal()"
+            class="px-4 py-2 text-sm rounded border border-[var(--color-border-default)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-surface)] transition"
+          >
+            Fermer
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Modal Détail -->
+  @if (showDetail() && selectedSauvegarde()) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-[var(--color-bg-surface)] rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="sticky top-0 bg-[var(--color-bg-hover)] border-b border-[var(--color-border-default)] px-6 py-4 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-[var(--color-primary-soft)] flex items-center justify-center">
+              <i class="fas fa-database text-[var(--color-primary)]"></i>
+            </div>
+            <div>
+              <h2 class="text-lg font-bold text-[var(--color-text-primary)]">Détail de la Sauvegarde</h2>
+              <p class="text-xs text-[var(--color-text-muted)]">{{ selectedSauvegarde()?.numeroSauvegarde }}</p>
+            </div>
+          </div>
+          <button
+            (click)="closeDetail()"
+            class="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition"
+          >
+            <i class="fas fa-times text-lg"></i>
+          </button>
+        </div>
+
+        <div class="p-6 space-y-6">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="p-3 rounded-lg bg-[var(--color-bg-hover)]">
+              <label class="text-xs font-medium text-[var(--color-text-muted)] uppercase">Statut</label>
+              <div class="mt-2 flex items-center gap-2">
+                <span
+                  class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium"
+                  [class]="getStatutColor(selectedSauvegarde()?.statut)"
+                >
+                  <i [class]="'fas ' + getStatusIcon(selectedSauvegarde()?.statut)"></i>
+                  {{ selectedSauvegarde()?.statut || '-' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="p-3 rounded-lg bg-[var(--color-bg-hover)]">
+              <label class="text-xs font-medium text-[var(--color-text-muted)] uppercase">Type</label>
+              <p class="text-sm font-medium text-[var(--color-text-primary)] mt-2">{{ selectedSauvegarde()?.typeBackup || '-' }}</p>
+            </div>
+
+            <div class="p-3 rounded-lg bg-[var(--color-bg-hover)]">
+              <label class="text-xs font-medium text-[var(--color-text-muted)] uppercase">Taille</label>
+              <p class="text-sm font-medium text-[var(--color-text-primary)] mt-2">{{ selectedSauvegarde()?.tailleGb ? (selectedSauvegarde()?.tailleGb + ' GB') : '-' }}</p>
+            </div>
+
+            <div class="p-3 rounded-lg bg-[var(--color-bg-hover)]">
+              <label class="text-xs font-medium text-[var(--color-text-muted)] uppercase">Durée</label>
+              <p class="text-sm font-medium text-[var(--color-text-primary)] mt-2">{{ formatDuration(selectedSauvegarde()?.dureeSecondes) }}</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)] uppercase">ID</label>
+              <p class="text-sm font-mono text-[var(--color-text-primary)] mt-1">{{ selectedSauvegarde()?.id }}</p>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)] uppercase">Numéro</label>
+              <p class="text-sm text-[var(--color-text-primary)] mt-1">{{ selectedSauvegarde()?.numeroSauvegarde || selectedSauvegarde()?.backupId }}</p>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)] uppercase">Date Début</label>
+              <p class="text-sm text-[var(--color-text-primary)] mt-1">{{ selectedSauvegarde()?.dateDebut ? (selectedSauvegarde()?.dateDebut | date: 'dd/MM/yyyy HH:mm:ss') : '-' }}</p>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)] uppercase">Date Fin</label>
+              <p class="text-sm text-[var(--color-text-primary)] mt-1">{{ selectedSauvegarde()?.dateFin ? (selectedSauvegarde()?.dateFin | date: 'dd/MM/yyyy HH:mm:ss') : '-' }}</p>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)] uppercase">Compression</label>
+              <p class="text-sm text-[var(--color-text-primary)] mt-1">{{ selectedSauvegarde()?.compression || '-' }}</p>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)] uppercase">Nombre de Fichiers</label>
+              <p class="text-sm text-[var(--color-text-primary)] mt-1">{{ selectedSauvegarde()?.nombreFichiers || '-' }}</p>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)] uppercase">Nombre de Tables</label>
+              <p class="text-sm text-[var(--color-text-primary)] mt-1">{{ selectedSauvegarde()?.nombreTables || '-' }}</p>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)] uppercase">Date Expiration</label>
+              <p class="text-sm text-[var(--color-text-primary)] mt-1">{{ selectedSauvegarde()?.dateExpiration ? (selectedSauvegarde()?.dateExpiration | date: 'dd/MM/yyyy') : '-' }}</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)] uppercase">Localisation Principale</label>
+              <p class="text-sm text-[var(--color-text-primary)] break-all mt-1 p-2 rounded bg-[var(--color-bg-hover)]">{{ selectedSauvegarde()?.localisationBackup || '-' }}</p>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)] uppercase">Localisation Secondaire</label>
+              <p class="text-sm text-[var(--color-text-primary)] break-all mt-1 p-2 rounded bg-[var(--color-bg-hover)]">{{ selectedSauvegarde()?.localisationSecondaire || '-' }}</p>
+            </div>
+          </div>
+
+          @if (selectedSauvegarde()?.checksumSha256) {
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)] uppercase">Checksum SHA256</label>
+              <p class="text-sm text-[var(--color-text-primary)] break-all mt-1 p-2 rounded bg-[var(--color-bg-hover)] font-mono">{{ selectedSauvegarde()?.checksumSha256 }}</p>
+            </div>
+          }
+
+          @if (selectedSauvegarde()?.messageErreur) {
+            <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <label class="text-xs font-medium text-red-700 uppercase">Message d'Erreur</label>
+              <p class="text-sm text-red-600 break-all mt-2">{{ selectedSauvegarde()?.messageErreur }}</p>
+            </div>
+          }
+
+          @if (selectedSauvegarde()?.utilisateur) {
+            <div class="p-3 rounded-lg bg-[var(--color-bg-hover)]">
+              <label class="text-xs font-medium text-[var(--color-text-muted)] uppercase">Créé par</label>
+              <p class="text-sm text-[var(--color-text-primary)] mt-1">
+                {{ selectedSauvegarde()?.utilisateur?.prenom }} {{ selectedSauvegarde()?.utilisateur?.nom }}
+                <span class="text-xs text-[var(--color-text-muted)]">({{ selectedSauvegarde()?.utilisateur?.email }})</span>
+              </p>
+            </div>
+          }
+
+          <!-- Compteur de Restaurations -->
+          @if (getRestoreCount() > 0) {
+            <div class="p-4 rounded-lg bg-orange-50 border border-orange-200">
+              <div class="flex items-center justify-between">
+                <div>
+                  <label class="text-xs font-medium text-orange-700 uppercase">Restaurations</label>
+                  <p class="text-sm text-orange-600 mt-1">
+                    <i class="fas fa-undo mr-2"></i>
+                    Cette sauvegarde a été restaurée <strong>{{ getRestoreCount() }}</strong> fois
+                  </p>
+                </div>
+                <div class="text-3xl font-bold text-orange-600">{{ getRestoreCount() }}</div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="bg-[var(--color-bg-hover)] border-t border-[var(--color-border-default)] px-6 py-4 flex justify-end gap-2">
+          <button
+            (click)="closeDetail()"
+            class="px-4 py-2 text-sm rounded border border-[var(--color-border-default)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-surface)] transition"
+          >
+            Fermer
+          </button>
+          @if (selectedSauvegarde()?.statut === 'SUCCESS' || selectedSauvegarde()?.statut === 'VERIFIED') {
+            <button
+              (click)="downloadBackup(selectedSauvegarde()!)"
+              [disabled]="actionLoading() === selectedSauvegarde()?.id"
+              class="px-4 py-2 text-sm rounded bg-green-600 text-white hover:opacity-90 transition disabled:opacity-50"
+            >
+              <i class="fas fa-download mr-2"></i>Télécharger
+            </button>
+            <button
+              (click)="prepareRestore(selectedSauvegarde()!)"
+              [disabled]="actionLoading() === selectedSauvegarde()?.id"
+              class="px-4 py-2 text-sm rounded bg-orange-600 text-white hover:opacity-90 transition disabled:opacity-50 flex items-center gap-2"
+            >
+              <i class="fas fa-undo"></i>
+              <span>Restaurer</span>
+            </button>
+          }
+          @if (selectedSauvegarde()?.statut === 'RESTORED') {
+            <button
+              (click)="downloadBackup(selectedSauvegarde()!)"
+              [disabled]="actionLoading() === selectedSauvegarde()?.id"
+              class="px-4 py-2 text-sm rounded bg-green-600 text-white hover:opacity-90 transition disabled:opacity-50"
+            >
+              <i class="fas fa-download mr-2"></i>Télécharger
+            </button>
+            <button
+              (click)="prepareRestore(selectedSauvegarde()!)"
+              [disabled]="actionLoading() === selectedSauvegarde()?.id"
+              class="px-4 py-2 text-sm rounded bg-orange-600 text-white hover:opacity-90 transition disabled:opacity-50 flex items-center gap-2"
+            >
+              <i class="fas fa-undo"></i>
+              <span>Restaurer à nouveau</span>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

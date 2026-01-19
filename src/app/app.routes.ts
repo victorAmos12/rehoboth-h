@@ -31,6 +31,8 @@ import { MaintenancesListPage } from './parametres/maintenances/maintenances-lis
 import { MaintenanceFormPage } from './parametres/maintenances/maintenance-form.page';
 import { SpecialitesListPage } from './parametres/specialites/specialites-list.page';
 import { SpecialiteFormPage } from './parametres/specialites/specialite-form.page';
+import { LogsAuditListPage } from './administrations/logs-audit/logs-audit-list.page';
+import { SauvegardesListPage } from './administrations/sauvegardes/sauvegardes-list.page';
 
 import { authGuard } from './guards/auth.guard';
 
@@ -74,6 +76,12 @@ export const routes: Routes = [
       // Alias de compatibilité si l'API menu envoie /api/roles-profils/roles
       { path: 'api/roles-profils/roles', redirectTo: 'parametres/roles', pathMatch: 'full' },
 
+      // Paramètres - Logs & Sauvegardes (alias pour compatibilité avec le mapping du backend)
+      { path: 'parametres/logs', redirectTo: 'administration/logs-audit', pathMatch: 'full' },
+      { path: 'parametres/logs-audit', redirectTo: 'administration/logs-audit', pathMatch: 'full' },
+      { path: 'parametres/sauvegardes', redirectTo: 'administration/sauvegardes', pathMatch: 'full' },
+      { path: 'parametres/archives', redirectTo: 'administration/sauvegardes', pathMatch: 'full' },
+
       // Administration - Chambres (avant Services, Lits, Équipements, Maintenances)
       { path: 'administration/chambres', component: ChambresListPage },
       { path: 'administration/chambres/create', component: ChambreFormPage },
@@ -107,6 +115,12 @@ export const routes: Routes = [
       { path: 'administration/specialites', component: SpecialitesListPage },
       { path: 'administration/specialites/create', component: SpecialiteFormPage },
       { path: 'administration/specialites/:id/edit', component: SpecialiteFormPage },
+
+      // Administration - Logs & Audits
+      { path: 'administration/logs-audit', component: LogsAuditListPage },
+
+      // Administration - Sauvegardes
+      { path: 'administration/sauvegardes', component: SauvegardesListPage },
     ],
   },
 ];

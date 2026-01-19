@@ -1,0 +1,310 @@
+<div class="p-6">
+  <div class="flex items-start justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-2xl font-semibold text-[var(--color-text-primary)]">Logs & Audits</h1>
+      <p class="text-sm text-[var(--color-text-muted)]">Administration / Logs & Audits</p>
+    </div>
+  </div>
+
+  <!-- Filtres -->
+  <div class="bg-[var(--color-bg-surface)] rounded-lg shadow-sm p-4 border border-[var(--color-border-default)] mb-6">
+    <h2 class="text-sm font-semibold text-[var(--color-text-primary)] mb-4">Filtres</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+      <div>
+        <label class="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Type Log</label>
+        <select
+          [(ngModel)]="filterTypeLog"
+          class="w-full px-3 py-2 text-sm bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] rounded border border-[var(--color-border-default)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+        >
+          <option value="">Tous</option>
+          <option value="AUDIT">Audit</option>
+          <option value="TECHNIQUE">Technique</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Action</label>
+        <select
+          [(ngModel)]="filterActionType"
+          class="w-full px-3 py-2 text-sm bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] rounded border border-[var(--color-border-default)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+        >
+          <option value="">Tous</option>
+          <option value="CREATE">Créer</option>
+          <option value="READ">Lire</option>
+          <option value="UPDATE">Modifier</option>
+          <option value="DELETE">Supprimer</option>
+          <option value="EXPORT">Exporter</option>
+          <option value="IMPORT">Importer</option>
+          <option value="LOGIN">Connexion</option>
+          <option value="LOGOUT">Déconnexion</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Entité</label>
+        <input
+          type="text"
+          [(ngModel)]="filterEntiteType"
+          placeholder="Patient, Utilisateur..."
+          class="w-full px-3 py-2 text-sm bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] rounded border border-[var(--color-border-default)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+        />
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Date Début</label>
+        <input
+          type="date"
+          [(ngModel)]="filterDateFrom"
+          class="w-full px-3 py-2 text-sm bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] rounded border border-[var(--color-border-default)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+        />
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Date Fin</label>
+        <input
+          type="date"
+          [(ngModel)]="filterDateTo"
+          class="w-full px-3 py-2 text-sm bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] rounded border border-[var(--color-border-default)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+        />
+      </div>
+    </div>
+
+    <div class="flex gap-2 mt-4">
+      <button
+        (click)="applyFilters()"
+        class="px-4 py-2 text-sm rounded bg-[var(--color-primary)] text-white hover:opacity-90 transition"
+      >
+        Appliquer
+      </button>
+      <button
+        (click)="resetFilters()"
+        class="px-4 py-2 text-sm rounded border border-[var(--color-border-default)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] transition"
+      >
+        Réinitialiser
+      </button>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="mb-4 p-3 rounded-lg bg-red-50 text-red-700 border border-red-200 text-sm">{{ error() }}</div>
+  }
+
+  @if (loading()) {
+    <div class="text-[var(--color-text-muted)] text-sm">Chargement…</div>
+  } @else {
+    <div class="overflow-x-auto rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-surface)]">
+      <table class="min-w-full">
+        <thead class="bg-[var(--color-bg-hover)]">
+          <tr>
+            <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Date</th>
+            <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Type</th>
+            <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Action</th>
+            <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Entité</th>
+            <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Utilisateur</th>
+            <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">IP</th>
+            <th class="text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Statut</th>
+            <th class="text-right text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider px-4 py-3">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (log of logs(); track log.id) {
+            <tr class="border-t border-[var(--color-border-default)] hover:bg-[var(--color-bg-hover)]">
+              <td class="px-4 py-3 text-sm text-[var(--color-text-secondary)]">
+                {{ log.dateCreation ? (log.dateCreation | date: 'dd/MM/yyyy HH:mm') : '-' }}
+              </td>
+              <td class="px-4 py-3 text-sm">
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-[var(--color-primary-soft)] text-[var(--color-primary)]">
+                  {{ log.typeLog || '-' }}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-sm">
+                <span
+                  class="inline-flex items-center px-2 py-1 rounded-full text-xs"
+                  [class]="getActionColor(log.actionType)"
+                >
+                  {{ log.actionType || '-' }}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-sm text-[var(--color-text-secondary)]">{{ log.entiteType || '-' }}</td>
+              <td class="px-4 py-3 text-sm text-[var(--color-text-secondary)]">{{ getUserName(log) }}</td>
+              <td class="px-4 py-3 text-sm font-mono text-[var(--color-text-secondary)]">{{ log.adresseIp || '-' }}</td>
+              <td class="px-4 py-3 text-sm">
+                <span
+                  class="inline-flex items-center px-2 py-1 rounded-full text-xs"
+                  [class]="getStatutColor(log.statut)"
+                >
+                  {{ log.statut || '-' }}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-right">
+                <button
+                  (click)="viewDetail(log)"
+                  class="text-sm text-[var(--color-primary)] hover:underline"
+                >
+                  Voir
+                </button>
+              </td>
+            </tr>
+          }
+
+          @if (logs().length === 0) {
+            <tr>
+              <td class="px-4 py-6 text-center text-sm text-[var(--color-text-muted)]" colspan="8">
+                Aucun log
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="flex items-center justify-between mt-4 text-sm text-[var(--color-text-muted)]">
+      <div>
+        Page {{ page() }} / {{ pages() }} • Total: {{ total() }}
+      </div>
+      <div class="flex gap-2">
+        <button
+          class="px-3 py-1 rounded border border-[var(--color-border-default)] hover:bg-[var(--color-bg-hover)] disabled:opacity-50 text-sm"
+          (click)="prev()"
+          [disabled]="page() <= 1"
+        >
+          Précédent
+        </button>
+        <button
+          class="px-3 py-1 rounded border border-[var(--color-border-default)] hover:bg-[var(--color-bg-hover)] disabled:opacity-50 text-sm"
+          (click)="next()"
+          [disabled]="page() >= pages()"
+        >
+          Suivant
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Modal Détail -->
+  @if (showDetail() && selectedLog()) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-[var(--color-bg-surface)] rounded-lg shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="sticky top-0 bg-[var(--color-bg-hover)] border-b border-[var(--color-border-default)] px-6 py-4 flex items-center justify-between">
+          <h2 class="text-lg font-bold text-[var(--color-text-primary)]">Détail du Log</h2>
+          <button
+            (click)="closeDetail()"
+            class="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="p-6 space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)]">ID</label>
+              <p class="text-sm font-mono text-[var(--color-text-primary)]">{{ selectedLog()?.id }}</p>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)]">Date</label>
+              <p class="text-sm text-[var(--color-text-primary)]">{{ selectedLog()?.dateCreation ? (selectedLog()?.dateCreation | date: 'dd/MM/yyyy HH:mm:ss') : '-' }}</p>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)]">Type Log</label>
+              <p class="text-sm text-[var(--color-text-primary)]">{{ selectedLog()?.typeLog || '-' }}</p>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)]">Action</label>
+              <p class="text-sm text-[var(--color-text-primary)]">{{ selectedLog()?.actionType || '-' }}</p>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)]">Entité</label>
+              <p class="text-sm text-[var(--color-text-primary)]">{{ selectedLog()?.entiteType || '-' }}</p>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)]">ID Entité</label>
+              <p class="text-sm text-[var(--color-text-primary)]">{{ selectedLog()?.entiteId || '-' }}</p>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)]">Utilisateur</label>
+              <p class="text-sm text-[var(--color-text-primary)]">{{ getUserName(selectedLog()!) }}</p>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)]">IP</label>
+              <p class="text-sm font-mono text-[var(--color-text-primary)]">{{ selectedLog()?.adresseIp || '-' }}</p>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)]">Endpoint</label>
+              <p class="text-sm font-mono text-[var(--color-text-primary)] break-all">{{ selectedLog()?.endpoint || '-' }}</p>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)]">Méthode HTTP</label>
+              <p class="text-sm text-[var(--color-text-primary)]">{{ selectedLog()?.methodeHttp || '-' }}</p>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)]">Code HTTP</label>
+              <p class="text-sm text-[var(--color-text-primary)]">{{ selectedLog()?.codeHttp || '-' }}</p>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)]">Temps Réponse</label>
+              <p class="text-sm text-[var(--color-text-primary)]">{{ selectedLog()?.tempsReponseMs ? (selectedLog()?.tempsReponseMs + ' ms') : '-' }}</p>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)]">Statut</label>
+              <p class="text-sm text-[var(--color-text-primary)]">{{ selectedLog()?.statut || '-' }}</p>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)]">Niveau</label>
+              <p class="text-sm text-[var(--color-text-primary)]">{{ selectedLog()?.niveau || '-' }}</p>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)]">Catégorie</label>
+              <p class="text-sm text-[var(--color-text-primary)]">{{ selectedLog()?.categorie || '-' }}</p>
+            </div>
+          </div>
+
+          @if (selectedLog()?.description) {
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)]">Description</label>
+              <p class="text-sm text-[var(--color-text-primary)] break-words">{{ selectedLog()?.description }}</p>
+            </div>
+          }
+
+          @if (selectedLog()?.message) {
+            <div>
+              <label class="text-xs font-medium text-[var(--color-text-muted)]">Message</label>
+              <p class="text-sm text-[var(--color-text-primary)] break-words">{{ selectedLog()?.message }}</p>
+            </div>
+          }
+
+          @if (selectedLog()?.ancienneValeur) {
+            <div class="p-3 bg-[var(--color-bg-hover)] rounded border border-[var(--color-border-default)]">
+              <label class="text-xs font-medium text-[var(--color-text-muted)]">Ancienne Valeur</label>
+              <pre class="text-xs text-[var(--color-text-secondary)] overflow-auto mt-2">{{ selectedLog()?.ancienneValeur | json }}</pre>
+            </div>
+          }
+
+          @if (selectedLog()?.nouvelleValeur) {
+            <div class="p-3 bg-[var(--color-bg-hover)] rounded border border-[var(--color-border-default)]">
+              <label class="text-xs font-medium text-[var(--color-text-muted)]">Nouvelle Valeur</label>
+              <pre class="text-xs text-[var(--color-text-secondary)] overflow-auto mt-2">{{ selectedLog()?.nouvelleValeur | json }}</pre>
+            </div>
+          }
+
+          @if (selectedLog()?.messageErreur) {
+            <div class="p-3 bg-red-50 border border-red-200 rounded">
+              <label class="text-xs font-medium text-red-700">Message d'Erreur</label>
+              <p class="text-sm text-red-600 break-words">{{ selectedLog()?.messageErreur }}</p>
+            </div>
+          }
+        </div>
+
+        <div class="bg-[var(--color-bg-hover)] border-t border-[var(--color-border-default)] px-6 py-4 flex justify-end">
+          <button
+            (click)="closeDetail()"
+            class="px-4 py-2 text-sm rounded bg-[var(--color-primary)] text-white hover:opacity-90 transition"
+          >
+            Fermer
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

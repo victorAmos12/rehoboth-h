@@ -162,6 +162,8 @@ export class AuthService {
       '/api/lits': '/administration/lits',
       '/api/equipements': '/administration/equipements',
       '/api/maintenances': '/administration/maintenances',
+      '/api/administrations/logs-audit': '/administration/logs-audit',
+      '/api/administrations/sauvegardes': '/administration/sauvegardes',
       'patients': '/patients',
       'dossiers-medicaux': '/dossiers-medicaux',
       'utilisateurs': '/rh/utilisateurs',
@@ -170,6 +172,16 @@ export class AuthService {
       'lits': '/administration/lits',
       'equipements': '/administration/equipements',
       'maintenances': '/administration/maintenances',
+      'logs-audit': '/administration/logs-audit',
+      'logs': '/administration/logs-audit',
+      'sauvegardes': '/administration/sauvegardes',
+      'archives': '/administration/sauvegardes',
+      'parametres/logs': '/administration/logs-audit',
+      'parametres/logs-audit': '/administration/logs-audit',
+      'parametres/sauvegardes': '/administration/sauvegardes',
+      'parametres/archives': '/administration/sauvegardes',
+      'administration/logs': '/administration/logs-audit',
+      'administration/archives': '/administration/sauvegardes',
     };
 
     // Chercher une correspondance exacte

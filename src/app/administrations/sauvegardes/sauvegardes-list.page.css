@@ -1,0 +1,179 @@
+/* Styles spécifiques pour la page des sauvegardes */
+
+:host {
+  display: block;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* KPI Cards */
+.kpi-card {
+  transition: all 0.3s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Table Rows */
+table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+table tbody tr:hover {
+  background-color: var(--color-bg-hover);
+}
+
+/* Action Buttons */
+button[disabled] {
+  cursor: not-allowed;
+}
+
+/* Modal Animations */
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-content {
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.status-badge:hover {
+  transform: scale(1.05);
+}
+
+/* Loading Spinner */
+.spinner {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  :host ::ng-deep .grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  :host ::ng-deep table {
+    font-size: 0.875rem;
+  }
+
+  :host ::ng-deep .px-6 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  :host ::ng-deep .hidden-mobile {
+    display: none;
+  }
+
+  /* Masquer certaines colonnes sur mobile */
+  :host ::ng-deep table th:nth-child(4),
+  :host ::ng-deep table td:nth-child(4) {
+    display: none;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .kpi-card {
+    background-color: var(--color-bg-surface);
+  }
+
+  .status-badge {
+    background-color: var(--color-bg-hover);
+  }
+}
+
+/* Accessibility */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+  button,
+  .no-print {
+    display: none;
+  }
+
+  table {
+    border-collapse: collapse;
+  }
+
+  table th,
+  table td {
+    border: 1px solid #000;
+    padding: 8px;
+  }
+}
